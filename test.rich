@@ -1,0 +1,9 @@
+
+myString: str -> "Hello, world"
+index: int -> 0
+
+while index < 10
+{
+    println(myString[index])
+    index -> index + 1
+}
