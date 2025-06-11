@@ -1,7 +1,7 @@
 namespace Fractals.Parser;
 
 [Flags]
-public enum Sensitivity : byte
+public enum MoveInclude : byte
 {
     None = 0,
     NewLines = 1 << 0,

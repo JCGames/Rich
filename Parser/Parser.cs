@@ -17,23 +17,23 @@ public partial class Parser
     
     /// <summary>
     /// By default, <see cref="MoveNext"/> ignores new lines and whitespace.
-    /// To stop on whitespace or new lines or both, pass a <see cref="Sensitivity"/>.
+    /// To stop on whitespace or new lines or both, pass a <see cref="MoveInclude"/>.
     /// </summary>
-    /// <param name="sensitivity">What should <see cref="MoveNext"/> stop on.</param>
+    /// <param name="moveInclude">What should <see cref="MoveNext"/> stop on.</param>
     /// <returns></returns>
-    private bool MoveNext(Sensitivity sensitivity = Sensitivity.None)
+    private bool MoveNext(MoveInclude moveInclude = MoveInclude.None)
     {
         if (_current + 1 >= _tokens.Count) return false;
 
         _current++;
 
-        Func<bool> predicate = sensitivity switch
+        Func<bool> predicate = moveInclude switch
         {
-            Sensitivity.None => () => 
+            MoveInclude.None => () => 
                 Token.Type is TokenType.Whitespace or TokenType.EndOfLine,
-            Sensitivity.NewLines => () => Token.Type is TokenType.Whitespace,
-            Sensitivity.Whitespace => () => Token.Type is TokenType.EndOfLine,
-            Sensitivity.Whitespace | Sensitivity.NewLines => () => false,
+            MoveInclude.NewLines => () => Token.Type is TokenType.Whitespace,
+            MoveInclude.Whitespace => () => Token.Type is TokenType.EndOfLine,
+            MoveInclude.Whitespace | MoveInclude.NewLines => () => false,
             _ => () =>
                 Token.Type is TokenType.Whitespace or TokenType.EndOfLine
         };
@@ -107,7 +107,7 @@ public partial class Parser
                 }
                 
                 if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError("Expected close bracket.", Token.Span);
-                MoveNext(Sensitivity.NewLines);
+                MoveNext(MoveInclude.NewLines);
                 break;
             case BlockType.Namespace:
                 Diagnoser.AddError("Not implemented yet.", Token.Span);
@@ -352,8 +352,8 @@ public partial class Parser
                 
                 if (Peek()?.Type is TokenType.OpenSquareBracket)
                 {
-                    MoveNext();
-                    MoveNext(Sensitivity.Whitespace | Sensitivity.NewLines);
+                    MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
+                    MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
                     
                     if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected close bracket.", Token.Span);
                     
@@ -370,7 +370,7 @@ public partial class Parser
                 }
                 else
                 {
-                    MoveNext(Sensitivity.NewLines);
+                    MoveNext(MoveInclude.NewLines);
                     return new VariableDeclarationSyntax(
                         accessorChainForReal,
                         typeSyntax,
@@ -390,7 +390,7 @@ public partial class Parser
                     typeSyntax,
                     ParseExpression());
                 
-                MoveNext(Sensitivity.NewLines);
+                MoveNext(MoveInclude.NewLines);
                 return declaration;
             }
         }
@@ -399,7 +399,7 @@ public partial class Parser
             MoveNext();
             MoveNext();
             var expression = ParseExpression();
-            MoveNext(Sensitivity.NewLines);
+            MoveNext(MoveInclude.NewLines);
             return new AssignmentSyntax
             {
                 Left = accessorChain,
@@ -408,7 +408,7 @@ public partial class Parser
         }
         else if (IsRightMostAFunctionCall() || acceptAnyAccessorChain)
         {
-            MoveNext(Sensitivity.NewLines);
+            MoveNext(MoveInclude.NewLines);
             return accessorChain;
         }
             
@@ -497,19 +497,19 @@ public partial class Parser
     {
         MoveNext();
         var @return = new ReturnSyntax(ParseExpression());
-        MoveNext(Sensitivity.NewLines);
+        MoveNext(MoveInclude.NewLines);
         return @return;
     }
 
     private BreakSyntax ParseBreak()
     {
-        MoveNext(Sensitivity.NewLines);
+        MoveNext(MoveInclude.NewLines);
         return new BreakSyntax();
     }
     
     private ContinueSyntax ParseContinue()
     {
-        MoveNext(Sensitivity.NewLines);
+        MoveNext(MoveInclude.NewLines);
         return new ContinueSyntax();
     }
 
@@ -580,7 +580,7 @@ public partial class Parser
         MoveNext();
         if (Token.Type is not TokenType.StringLiteral) Diagnoser.AddError("Expected string literal.", Token.Span);
         var stringLiteralSpan = Token.Span;
-        MoveNext(Sensitivity.NewLines);
+        MoveNext(MoveInclude.NewLines);
         return new ImportSyntax(stringLiteralSpan);
     }
 
@@ -624,7 +624,7 @@ public partial class Parser
         }
         
         if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError("Expected closing bracket.", Token.Span);
-        MoveNext(Sensitivity.NewLines);
+        MoveNext(MoveInclude.NewLines);
 
         return typeDefinition;
     }
