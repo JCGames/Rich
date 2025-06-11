@@ -1,16 +1,14 @@
 namespace Fractals.Parser.SyntaxNodes;
 
-public class NewSyntax(Syntax accessorChain) : Syntax
+public class ArrayInitializerSyntax(ExpressionSyntax expressionSyntax) : Syntax
 {
-    public Syntax AccessorChain { get; set; } = accessorChain;
+    public ExpressionSyntax Expression { get; set; } = expressionSyntax;
     
     public override void Print()
     {
         Printer.PrintLine(GetType().Name);
         Printer.IncreasePadding();
-        
-        AccessorChain.Print();
-        
+        Expression.Print();
         Printer.DecreasePadding();
     }
 }

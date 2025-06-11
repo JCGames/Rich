@@ -1,16 +1,1 @@
-type Vector2 {
-    name: str
-    x: decimal
-    y: decimal
-    
-    function toString(): str
-    {
-        return "Name: " + name + "X: " + x + " Y: " + y
-    }
-}
-
-value: Vector2 -> new Vector2()
-value.x -> 10
-value.y -> 100
-value.name -> "My New Vector2"
-println(value.toString())
+x: int[] -> new [10]

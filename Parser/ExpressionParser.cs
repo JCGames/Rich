@@ -220,16 +220,35 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordNew)
         {
             MoveNext();
-            var fc = ParseStatementThatStartsWithIdentifier();
+            
+            if (Token.Type is TokenType.OpenSquareBracket)
+            {
+                MoveNext();
+                var expression = ParseExpression();
+                MoveNext();
+            
+                if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected a close parenthesis.", Token.Span);
+
+                MoveNext();
+            
+                return new ArrayInitializerSyntax(expression);
+            }
+            
+            var fc = ParseStatementThatStartsWithIdentifier(acceptAnyAccessorChain: true);
             MoveNextIfEndOfLine();
 
-            if (fc is not FunctionCallSyntax functionCall)
+            if (fc is FunctionCallSyntax functionCall)
             {
-                Diagnoser.AddError("Invalid new operation.", Token.Span);
-                return null;
+                return new NewSyntax(functionCall);
             }
-
-            return new NewSyntax(functionCall);
+            
+            if (fc is AccessorSyntax { Left: FunctionCallSyntax } accessor)
+            {
+                return new NewSyntax(accessor);
+            }
+            
+            Diagnoser.AddError("Invalid new operation.", Token.Span);
+            return null;
         }
         
         switch (Token.Type)

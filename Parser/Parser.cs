@@ -33,7 +33,7 @@ public partial class Parser
                 Token.Type is TokenType.Whitespace or TokenType.EndOfLine,
             Sensitivity.NewLines => () => Token.Type is TokenType.Whitespace,
             Sensitivity.Whitespace => () => Token.Type is TokenType.EndOfLine,
-            Sensitivity.Whitespace | Sensitivity.NewLines => () => true,
+            Sensitivity.Whitespace | Sensitivity.NewLines => () => false,
             _ => () =>
                 Token.Type is TokenType.Whitespace or TokenType.EndOfLine
         };
@@ -319,7 +319,7 @@ public partial class Parser
     /// <code>
     /// AccessorChain Colon [BuiltInType | Identifier] (Assignment Expression?)? EndOfLine
     /// </code>
-    private Syntax? ParseStatementThatStartsWithIdentifier()
+    private Syntax? ParseStatementThatStartsWithIdentifier(bool acceptAnyAccessorChain = false)
     {
         var accessorChain = ParseAccessorChain();
         
@@ -348,7 +348,21 @@ public partial class Parser
             
             if (Token.Type is TokenType.BuiltInType or TokenType.Identifier)
             {
-                typeSyntax = new TypeSyntax(Token.Span);
+                var identifierSpan = Token.Span;
+                
+                if (Peek()?.Type is TokenType.OpenSquareBracket)
+                {
+                    MoveNext();
+                    MoveNext(Sensitivity.Whitespace | Sensitivity.NewLines);
+                    
+                    if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected close bracket.", Token.Span);
+                    
+                    typeSyntax = new ArrayTypeSyntax(identifierSpan);
+                }
+                else
+                {
+                    typeSyntax = new TypeSyntax(identifierSpan);
+                }
 
                 if (Peek()?.Type is TokenType.Assignment)
                 {
@@ -392,7 +406,7 @@ public partial class Parser
                 Right = expression
             };
         }
-        else if (accessorChain is FunctionCallSyntax)
+        else if (IsRightMostAFunctionCall() || acceptAnyAccessorChain)
         {
             MoveNext(Sensitivity.NewLines);
             return accessorChain;
@@ -400,6 +414,20 @@ public partial class Parser
             
         Diagnoser.AddError("Incomplete statement.", Token.Span);
         return null;
+
+        bool IsRightMostAFunctionCall()
+        {
+            if (accessorChain is AccessorSyntax accessor)
+            {
+                while (accessor.Right is AccessorSyntax right)
+                {
+                    accessor = right;
+                }
+                
+                return accessor.Right is FunctionCallSyntax;
+            }
+            return accessorChain is FunctionCallSyntax;
+        }
     }
 
     /// <summary>
