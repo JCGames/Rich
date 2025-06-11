@@ -1,9 +1,16 @@
-
-myString: str -> "Hello, world"
-index: int -> 0
-
-while index < 10
-{
-    println(myString[index])
-    index -> index + 1
+type Vector2 {
+    name: str
+    x: decimal
+    y: decimal
+    
+    function toString(): str
+    {
+        return "Name: " + name + "X: " + x + " Y: " + y
+    }
 }
+
+value: Vector2 -> new Vector2()
+value.x -> 10
+value.y -> 100
+value.name -> "My New Vector2"
+println(value.toString())

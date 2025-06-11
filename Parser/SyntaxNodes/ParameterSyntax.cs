@@ -12,7 +12,7 @@ public class ParameterSyntax(SpanMeta nameSpan, TypeSyntax typeSyntax) : Syntax
         Printer.PrintLine(GetType().Name);
         Printer.IncreasePadding();
         
-        Printer.PrintLine($"Parameter Name: {NameSpan}");
+        Printer.PrintLine($"Parameter Name: {NameSpan.Text}");
         Type.Print();
         
         Printer.DecreasePadding();

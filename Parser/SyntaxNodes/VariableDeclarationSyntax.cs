@@ -2,11 +2,11 @@ using Fractals.Lexer;
 
 namespace Fractals.Parser.SyntaxNodes;
 
-public class VariableDeclarationSyntax(IdentifierSyntax? identifier, TypeSyntax? type, ExpressionSyntax expressionSyntax) : Syntax
+public class VariableDeclarationSyntax(IdentifierSyntax identifier, TypeSyntax? type, ExpressionSyntax? expressionSyntax) : Syntax
 {
-    public IdentifierSyntax? Identifier { get; init; } = identifier;
+    public IdentifierSyntax Identifier { get; init; } = identifier;
     public TypeSyntax? Type { get; set; } = type;
-    public ExpressionSyntax Expression { get; init; } = expressionSyntax;
+    public ExpressionSyntax? Expression { get; init; } = expressionSyntax;
     
     public override void Print()
     {
@@ -15,7 +15,7 @@ public class VariableDeclarationSyntax(IdentifierSyntax? identifier, TypeSyntax?
         Type?.Print();
         Printer.IncreasePadding();
         
-        Expression.Print();
+        Expression?.Print();
         
         Printer.DecreasePadding();
     }

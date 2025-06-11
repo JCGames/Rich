@@ -9,6 +9,7 @@ public enum TokenType
     Decimal,
     Boolean,
     StringLiteral,
+    Nothing,
     BuiltInType,
     Identifier,
     OpenBracket,

@@ -2,6 +2,7 @@ using Fractals.Diagnostics;
 using Fractals.Lexer;
 using Fractals.Parser.SyntaxNodes;
 using Fractals.Parser.SyntaxNodes.Expressions;
+using Microsoft.VisualBasic;
 
 namespace Fractals.Parser;
 
@@ -211,9 +212,24 @@ public partial class Parser
         
         if (IsIndexor || IsFunctionCall || Token.Type is TokenType.Identifier)
         {
-            var accessor = ParseAccessorTree();
+            var accessor = ParseAccessorChain();
             MoveNext();
             return accessor;
+        }
+
+        if (Token.Type is TokenType.KeywordNew)
+        {
+            MoveNext();
+            var fc = ParseStatementThatStartsWithIdentifier();
+            MoveNextIfEndOfLine();
+
+            if (fc is not FunctionCallSyntax functionCall)
+            {
+                Diagnoser.AddError("Invalid new operation.", Token.Span);
+                return null;
+            }
+
+            return new NewSyntax(functionCall);
         }
         
         switch (Token.Type)
@@ -232,6 +248,9 @@ public partial class Parser
                 break;
             case TokenType.BuiltInType:
                 result = new IdentifierSyntax(Token.Span);
+                break;
+            case TokenType.Nothing:
+                result = new NothingSyntax();
                 break;
             case TokenType.Subtraction:
                 MoveNext();

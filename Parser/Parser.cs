@@ -132,6 +132,14 @@ public partial class Parser
     
     private Syntax? ParseStatement()
     {
+        if (Token.Type is TokenType.KeywordType)
+        {
+            var typeDefinition = ParseTypeDefinition();
+            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            MoveNextIfEndOfLine();
+            return typeDefinition;
+        }
+        
         if (Token.Type is TokenType.KeywordFunction)
         {
             var function = ParseFunction();
@@ -241,6 +249,10 @@ public partial class Parser
         return functionCall;
     }
 
+    /// <code>
+    /// KeywordFunction Identifier OpenParenthesis (Identifier Colon [BuiltInType | Identifier] Comma)... CloseParenthesis
+    /// OpenBracket CloseBracket EndOfLine
+    /// </code>
     private FunctionSyntax ParseFunction()
     {
         if (Token.Type is not TokenType.KeywordFunction) Diagnoser.AddError("Expected function keyword.", Token.Span);
@@ -303,44 +315,65 @@ public partial class Parser
         
         return function;
     }
-
+    
+    /// <code>
+    /// AccessorChain Colon [BuiltInType | Identifier] (Assignment Expression?)? EndOfLine
+    /// </code>
     private Syntax? ParseStatementThatStartsWithIdentifier()
     {
-        var accessorTree = ParseAccessorTree();
-
+        var accessorChain = ParseAccessorChain();
+        
         if (Peek()?.Type is TokenType.Colon)
         {
             MoveNext();
+
+            // if what was returned from the ParseAccessorTree method
+            // was not a IdentifierSyntax then we don't have a variable
+            // declaration, and we should quickly exit with an error
+            if (accessorChain is not IdentifierSyntax accessorChainForReal)
+            {
+                Diagnoser.AddError("Expected identifier.", Token.Span);
+                return null;
+            }
             
-            if (accessorTree is not IdentifierSyntax) Diagnoser.AddError("Expected identifier.", Token.Span);
-            
+            // move to what could be a type or an assignment
+            // if the next token is an assignment, the variable is an auto property
+            // if the next token is an identifier or built-in type,
+            //      the variable could be a declaration without an expression or with one
+            // if the variable declaration does not have an expression it is expected
+            // to obtain a default value or be assigned a value
             MoveNext();
+
+            TypeSyntax? typeSyntax = null;
+            
+            if (Token.Type is TokenType.BuiltInType or TokenType.Identifier)
+            {
+                typeSyntax = new TypeSyntax(Token.Span);
+
+                if (Peek()?.Type is TokenType.Assignment)
+                {
+                    MoveNext();
+                }
+                else
+                {
+                    MoveNext(Sensitivity.NewLines);
+                    return new VariableDeclarationSyntax(
+                        accessorChainForReal,
+                        typeSyntax,
+                        null);
+                }
+            }
+            else if (Token.Type is not TokenType.Assignment)
+            {
+                Diagnoser.AddError("Invalid variable declaration.", Token.Span);
+            }
 
             if (Token.Type is TokenType.Assignment)
             {
                 MoveNext();
                 var declaration = new VariableDeclarationSyntax(
-                    accessorTree as IdentifierSyntax,
-                    null,
-                    ParseExpression());
-                
-                MoveNext(Sensitivity.NewLines);
-                return declaration;
-            }
-
-            if (Token.Type is not TokenType.BuiltInType and not TokenType.Identifier)
-            {
-                Diagnoser.AddError("Expected built-in type or identifier.", Token.Span);
-            }
-            var typeSpan = Token.Span;
-            MoveNext();
-
-            if (Token.Type is TokenType.Assignment)
-            {
-                MoveNext();
-                var declaration = new VariableDeclarationSyntax(
-                    accessorTree as IdentifierSyntax,
-                    new TypeSyntax(typeSpan),
+                    accessorChainForReal,
+                    typeSyntax,
                     ParseExpression());
                 
                 MoveNext(Sensitivity.NewLines);
@@ -355,14 +388,14 @@ public partial class Parser
             MoveNext(Sensitivity.NewLines);
             return new AssignmentSyntax
             {
-                Left = accessorTree,
+                Left = accessorChain,
                 Right = expression
             };
         }
-        else if (accessorTree is FunctionCallSyntax)
+        else if (accessorChain is FunctionCallSyntax)
         {
             MoveNext(Sensitivity.NewLines);
-            return accessorTree;
+            return accessorChain;
         }
             
         Diagnoser.AddError("Incomplete statement.", Token.Span);
@@ -393,7 +426,7 @@ public partial class Parser
     /// Should land on the identifier or close ] bracket of an indexor.
     /// </summary>
     /// <returns></returns>
-    private Syntax? ParseAccessorTree()
+    private Syntax? ParseAccessorChain()
     {
         Syntax? left;
         
@@ -423,7 +456,7 @@ public partial class Parser
         MoveNext();
         MoveNext();
 
-        var right = ParseAccessorTree();
+        var right = ParseAccessorChain();
         
         return new AccessorSyntax
         {
@@ -521,5 +554,50 @@ public partial class Parser
         var stringLiteralSpan = Token.Span;
         MoveNext(Sensitivity.NewLines);
         return new ImportSyntax(stringLiteralSpan);
+    }
+
+    private TypeDefinitionSyntax ParseTypeDefinition()
+    {
+        MoveNext();
+        
+        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+        var identifierSpan = Token.Span;
+
+        MoveNext();
+
+        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Expected open bracket.", Token.Span);
+
+        MoveNext();
+
+        var typeDefinition = new TypeDefinitionSyntax(new IdentifierSyntax(identifierSpan));
+
+        while (!IsEndOfTokens && Token.Type is not TokenType.CloseBracket)
+        {
+            if (Token.Type is TokenType.Identifier)
+            {
+                if (ParseStatementThatStartsWithIdentifier() is VariableDeclarationSyntax variableDeclaration)
+                {
+                    typeDefinition.Variables.Add(variableDeclaration);
+                }
+                else
+                {
+                    Diagnoser.AddError("Expected variable declaration.", Token.Span);
+                }
+            }
+            else if (Token.Type is TokenType.KeywordFunction)
+            {
+                typeDefinition.Functions.Add(ParseFunction());
+            }
+            else
+            {
+                Diagnoser.AddError("Expected function or variable.", Token.Span);
+            }
+            MoveNext();
+        }
+        
+        if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError("Expected closing bracket.", Token.Span);
+        MoveNext(Sensitivity.NewLines);
+
+        return typeDefinition;
     }
 }

@@ -181,6 +181,7 @@ public class Lexer
             "type" => new Token(TokenType.KeywordType, spanMeta),
             "break" => new Token(TokenType.KeywordBreak, spanMeta),
             "continue" => new Token(TokenType.KeywordContinue, spanMeta),
+            "nothing" => new Token(TokenType.Nothing, spanMeta),
             _ => new Token(TokenType.Identifier, spanMeta)
         };
     }
