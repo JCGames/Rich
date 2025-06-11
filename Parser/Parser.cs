@@ -263,6 +263,12 @@ public partial class Parser
         var function = new FunctionSyntax(Token.Span);
         
         MoveNext();
+
+        if (Token.Type is TokenType.LessThan)
+        {
+            function.GenericsListDefinition = ParseGenericsListDefinition();
+            MoveNext();
+        }
         
         if (Token.Type is not TokenType.OpenParenthesis) Diagnoser.AddError("Expected open parenthesis.", Token.Span);
         MoveNext();
@@ -593,6 +599,14 @@ public partial class Parser
 
         MoveNext();
 
+        GenericsListDefinitionSyntax? genericsListDefinitionSyntax = null;
+
+        if (Token.Type is TokenType.LessThan)
+        {
+            genericsListDefinitionSyntax = ParseGenericsListDefinition();
+            MoveNext();
+        }
+
         if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Expected open bracket.", Token.Span);
 
         MoveNext();
@@ -626,6 +640,58 @@ public partial class Parser
         if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError("Expected closing bracket.", Token.Span);
         MoveNext(MoveInclude.NewLines);
 
+        typeDefinition.GenericsListDefinition = genericsListDefinitionSyntax;
         return typeDefinition;
+    }
+
+    private GenericsListDefinitionSyntax ParseGenericsListDefinition()
+    {
+        var genericsListDefinitionSyntax = new GenericsListDefinitionSyntax();
+            
+        MoveNext();
+
+        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("No generics in this list.", Token.Span);
+            
+        while (true)
+        {
+            if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+                
+            genericsListDefinitionSyntax.Identifiers.Add(new IdentifierSyntax(Token.Span));
+                
+            MoveNext();
+            if (Token.Type is TokenType.GreaterThan) break;
+            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected commas.", Token.Span);
+            if (!MoveNext()) break;
+        }
+        
+        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Expected greater than.", Token.Span);
+
+        return genericsListDefinitionSyntax;
+    }
+    
+    // TODO: make parsing types include array types
+    private GenericsListSyntax ParseGenericsList()
+    {
+        var genericsListSyntax = new GenericsListSyntax();
+            
+        MoveNext();
+
+        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("No generics in this list.", Token.Span);
+            
+        while (true)
+        {
+            if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+                
+            genericsListSyntax.Generics.Add(new TypeSyntax(Token.Span));
+                
+            MoveNext();
+            if (Token.Type is TokenType.GreaterThan) break;
+            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected commas.", Token.Span);
+            if (!MoveNext()) break;
+        }
+        
+        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Expected greater than.", Token.Span);
+
+        return genericsListSyntax;
     }
 }

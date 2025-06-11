@@ -1,5 +1,4 @@
-﻿using Fractals.Compiler.Cpp;
-using Fractals.Diagnostics;
+﻿using Fractals.Diagnostics;
 using Fractals.Lexer;
 using Fractals.Parser;
 
@@ -36,9 +35,3 @@ if (Diagnoser.Dump())
 {
     return;
 }
-
-// var compiler = new CppCompiler();
-//
-// compiler.Compile(ast);
-//
-// Diagnoser.Dump();

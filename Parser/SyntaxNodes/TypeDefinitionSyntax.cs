@@ -5,6 +5,7 @@ public class TypeDefinitionSyntax(IdentifierSyntax identifierSyntax) : Syntax
     public IdentifierSyntax Identifier { get; init; } = identifierSyntax;
     public List<VariableDeclarationSyntax> Variables { get; set; } = [];
     public List<FunctionSyntax> Functions { get; } = [];
+    public GenericsListDefinitionSyntax? GenericsListDefinition { get; set; }
     
     public override void Print()
     {
@@ -22,6 +23,8 @@ public class TypeDefinitionSyntax(IdentifierSyntax identifierSyntax) : Syntax
         {
             f.Print();
         }
+        
+        GenericsListDefinition?.Print();
         
         Printer.DecreasePadding();
     }
