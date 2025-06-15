@@ -6,6 +6,7 @@ public class FunctionCallSyntax(SpanMeta nameSpan) : Syntax
 {
     public SpanMeta NameSpan { get; } = nameSpan;
     public List<ExpressionSyntax> Arguments { get; } = [];
+    public GenericsListSyntax? Generics { get; set; }
     
     public override void Print()
     {
@@ -21,5 +22,6 @@ public class FunctionCallSyntax(SpanMeta nameSpan) : Syntax
         
         Printer.DecreasePadding();
         Printer.PrintLine("]");
+        Generics?.Print();
     }
 }

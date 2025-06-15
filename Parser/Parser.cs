@@ -11,7 +11,7 @@ public partial class Parser
     private int _current;
     private Token Token => _tokens[_current];
     private bool IsEndOfTokens => Token.Type is TokenType.EndOfFile;
-    private bool IsFunctionCall => Token.Type is TokenType.Identifier && Peek()?.Type is TokenType.OpenParenthesis;
+    private bool IsFunctionCall => Token.Type is TokenType.Identifier && (Peek()?.Type is TokenType.OpenParenthesis || Peek()?.Type is TokenType.LessThan);
     private bool IsEndOfStatement => Token.Type is TokenType.EndOfLine or TokenType.EndOfFile or TokenType.CloseBracket;
     private bool IsIndexor => Token.Type is TokenType.Identifier && Peek()?.Type is TokenType.OpenSquareBracket;
     
@@ -91,7 +91,7 @@ public partial class Parser
         switch (blockType)
         {
             case BlockType.Block:
-                if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Expected open bracket.", Token.Span);
+                if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Block must begin with {.", Token.Span);
                 MoveNext();
                 
                 while (!IsEndOfTokens && Token.Type is not TokenType.CloseBracket)
@@ -106,7 +106,7 @@ public partial class Parser
                     }
                 }
                 
-                if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError("Expected close bracket.", Token.Span);
+                if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError("Block must end with }.", Token.Span);
                 MoveNext(MoveInclude.NewLines);
                 break;
             case BlockType.Namespace:
@@ -135,7 +135,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordType)
         {
             var typeDefinition = ParseTypeDefinition();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return typeDefinition;
         }
@@ -143,7 +143,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordFunction)
         {
             var function = ParseFunction();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return function;
         }
@@ -151,7 +151,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordReturn)
         {
             var @return = ParseReturn();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return @return;
         }
@@ -159,7 +159,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordBreak)
         {
             var @break = ParseBreak();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return @break;
         }
@@ -167,7 +167,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordContinue)
         {
             var @continue = ParseContinue();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return @continue;
         }
@@ -175,7 +175,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordWhile)
         {
             var @while = ParseWhile();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return @while;
         }
@@ -183,7 +183,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordIf)
         {
             var @if = ParseIf();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return @if;
         }
@@ -191,7 +191,7 @@ public partial class Parser
         if (Token.Type is TokenType.KeywordImport)
         {
             var import = ParseImport();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return import;
         }
@@ -199,7 +199,7 @@ public partial class Parser
         if (Token.Type is TokenType.Identifier)
         {
             var statement = ParseStatementThatStartsWithIdentifier();
-            if (!IsEndOfStatement) Diagnoser.AddError($"Expected the end of a statement but got {Token.Span.Text}.", Token.Span);
+            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
             return statement;
         }
@@ -207,7 +207,7 @@ public partial class Parser
         if (Token.Type is TokenType.BuiltInType) Diagnoser.AddError("Type should not be here.", Token.Span);
         if (Token.Type is TokenType.Whitespace or TokenType.EndOfLine) return null;
         
-        Diagnoser.AddError($"Unknown statement: {Token.Span.Text}.", Token.Span);
+        Diagnoser.AddError("Invalid statement.", Token.Span);
         return null;
     }
 
@@ -218,13 +218,19 @@ public partial class Parser
     private FunctionCallSyntax ParseFunctionCall()
     {
         // myFunc
-        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected name of function.", Token.Span);
 
         var functionCall = new FunctionCallSyntax(Token.Span);
         MoveNext();
+
+        if (Token.Type is TokenType.LessThan)
+        {
+            functionCall.Generics = ParseGenericsList();
+            MoveNext();
+        }
         
         // myFunc (
-        if (Token.Type is not TokenType.OpenParenthesis) Diagnoser.AddError("Expected open parenthesis.", Token.Span);
+        if (Token.Type is not TokenType.OpenParenthesis) Diagnoser.AddError("Expected (.", Token.Span);
         MoveNext();
 
         // myFunc (expression ?
@@ -242,7 +248,7 @@ public partial class Parser
                 if (!MoveNext()) break;
             }
             
-            if (Token.Type is not TokenType.CloseParenthesis) Diagnoser.AddError("Expected close parenthesis.", Token.Span);
+            if (Token.Type is not TokenType.CloseParenthesis) Diagnoser.AddError("Expected close ).", Token.Span);
         }
         // otherwise myFunc ()
         
@@ -258,7 +264,7 @@ public partial class Parser
         if (Token.Type is not TokenType.KeywordFunction) Diagnoser.AddError("Expected function keyword.", Token.Span);
         MoveNext();
         
-        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected function name.", Token.Span);
         
         var function = new FunctionSyntax(Token.Span);
         
@@ -270,26 +276,22 @@ public partial class Parser
             MoveNext();
         }
         
-        if (Token.Type is not TokenType.OpenParenthesis) Diagnoser.AddError("Expected open parenthesis.", Token.Span);
+        if (Token.Type is not TokenType.OpenParenthesis) Diagnoser.AddError("Expected (.", Token.Span);
         MoveNext();
 
         if (Token.Type is not TokenType.CloseParenthesis)
         {
             while (true)
             {
-                if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+                if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected parameter name.", Token.Span);
                 var parameterNameSpan = Token.Span;
                 MoveNext();
                 
                 if (Token.Type is not TokenType.Colon) Diagnoser.AddError("Expected colon.", Token.Span);
                 MoveNext();
                 
-                if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Diagnoser.AddError("Expected built-in type or identifier.", Token.Span);
-                var typeNameSpan = Token.Span;
-                var isBuiltIn = Token.Type is TokenType.BuiltInType;
+                var parameter = new ParameterSyntax(parameterNameSpan, ParseType());
                 MoveNext();
-                
-                var parameter = new ParameterSyntax(parameterNameSpan, new TypeSyntax(typeNameSpan) { BuiltIn = isBuiltIn });
                 function.Parameters.Add(parameter);
 
                 if (Token.Type is TokenType.CloseParenthesis) break;
@@ -297,7 +299,7 @@ public partial class Parser
                 if (!MoveNext()) break;
             }
             
-            if (Token.Type is not TokenType.CloseParenthesis) Diagnoser.AddError("Expected close parenthesis.", Token.Span);
+            if (Token.Type is not TokenType.CloseParenthesis) Diagnoser.AddError("Expected ).", Token.Span);
         }
 
         MoveNext();
@@ -305,18 +307,11 @@ public partial class Parser
         if (Token.Type is TokenType.Colon)
         {
             MoveNext();
-            
-            if (Token.Type is not TokenType.BuiltInType and not TokenType.Identifier) Diagnoser.AddError("Expected built-in type or identifier.", Token.Span);
-            var typeNameSpan = Token.Span;
-            var isBuiltIn = Token.Type is TokenType.BuiltInType;
+            function.ReturnType = ParseType();
             MoveNext();
-
-            var type = new TypeSyntax(typeNameSpan) { BuiltIn = isBuiltIn };
-            
-            function.ReturnType = type;
         }
         
-        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Expected open bracket.", Token.Span);
+        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Function should have a body but is missing {.", Token.Span);
         function.Body = ParseBlock(BlockType.Block);
         
         return function;
@@ -338,7 +333,7 @@ public partial class Parser
             // declaration, and we should quickly exit with an error
             if (accessorChain is not IdentifierSyntax accessorChainForReal)
             {
-                Diagnoser.AddError("Expected identifier.", Token.Span);
+                Diagnoser.AddError("Expected the name of a variable and not an accessor chain.", Token.Span);
                 return null;
             }
             
@@ -354,21 +349,7 @@ public partial class Parser
             
             if (Token.Type is TokenType.BuiltInType or TokenType.Identifier)
             {
-                var identifierSpan = Token.Span;
-                
-                if (Peek()?.Type is TokenType.OpenSquareBracket)
-                {
-                    MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
-                    MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
-                    
-                    if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected close bracket.", Token.Span);
-                    
-                    typeSyntax = new ArrayTypeSyntax(identifierSpan);
-                }
-                else
-                {
-                    typeSyntax = new TypeSyntax(identifierSpan);
-                }
+                typeSyntax = ParseType();
 
                 if (Peek()?.Type is TokenType.Assignment)
                 {
@@ -385,7 +366,7 @@ public partial class Parser
             }
             else if (Token.Type is not TokenType.Assignment)
             {
-                Diagnoser.AddError("Invalid variable declaration.", Token.Span);
+                Diagnoser.AddError("Auto variables require an assignment.", Token.Span);
             }
 
             if (Token.Type is TokenType.Assignment)
@@ -418,7 +399,7 @@ public partial class Parser
             return accessorChain;
         }
             
-        Diagnoser.AddError("Incomplete statement.", Token.Span);
+        Diagnoser.AddError("A solitary accessor chain is not allowed.", Token.Span);
         return null;
 
         bool IsRightMostAFunctionCall()
@@ -446,12 +427,12 @@ public partial class Parser
         MoveNext();
         MoveNext();
 
-        if (Token.Type is TokenType.CloseSquareBracket) Diagnoser.AddError("No expression given to the indexor.", Token.Span);
+        if (Token.Type is TokenType.CloseSquareBracket) Diagnoser.AddError("Indexors require an index to be specified.", Token.Span);
      
         var expression = ParseExpression();
         MoveNext();
         
-        if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected close square bracket.", Token.Span);
+        if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected ].", Token.Span);
         
         return new IndexorSyntax(new IdentifierSyntax(identifierSpan), expression);
     }
@@ -479,7 +460,7 @@ public partial class Parser
         else
         {
             left = null;
-            Diagnoser.AddError("Expected indexor or identifier.", Token.Span);
+            Diagnoser.AddError("Expected indexor, identifier or function call.", Token.Span);
         }
 
         if (Peek()?.Type is not TokenType.DotAccessor)
@@ -525,7 +506,7 @@ public partial class Parser
         var condition = ParseExpression();
         MoveNext();
         
-        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Expected open bracket.", Token.Span);
+        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("While statement does not have a body because it is missing {.", Token.Span);
 
         var body = ParseBlock(BlockType.Block);
         
@@ -541,7 +522,7 @@ public partial class Parser
         var condition = ParseExpression();
         MoveNext();
         
-        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Expected open bracket.", Token.Span);
+        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("If statement does not have a body because it is missing {.", Token.Span);
         
         var body = ParseBlock(BlockType.Block);
         
@@ -594,7 +575,7 @@ public partial class Parser
     {
         MoveNext();
         
-        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected type definition name.", Token.Span);
         var identifierSpan = Token.Span;
 
         MoveNext();
@@ -607,7 +588,7 @@ public partial class Parser
             MoveNext();
         }
 
-        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Expected open bracket.", Token.Span);
+        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Type definition does not have a body because it is missing {.", Token.Span);
 
         MoveNext();
 
@@ -632,12 +613,12 @@ public partial class Parser
             }
             else
             {
-                Diagnoser.AddError("Expected function or variable.", Token.Span);
+                Diagnoser.AddError("Expected function or variable declaration.", Token.Span);
             }
             MoveNext();
         }
         
-        if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError("Expected closing bracket.", Token.Span);
+        if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError($"The body for the type definition {identifierSpan.Text} should end with }}.", Token.Span);
         MoveNext(MoveInclude.NewLines);
 
         typeDefinition.GenericsListDefinition = genericsListDefinitionSyntax;
@@ -650,48 +631,81 @@ public partial class Parser
             
         MoveNext();
 
-        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("No generics in this list.", Token.Span);
+        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("Generics list definition should have at least one generic type.", Token.Span);
             
         while (true)
         {
-            if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+            if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected generic name.", Token.Span);
                 
             genericsListDefinitionSyntax.Identifiers.Add(new IdentifierSyntax(Token.Span));
                 
             MoveNext();
             if (Token.Type is TokenType.GreaterThan) break;
-            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected commas.", Token.Span);
+            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected comma.", Token.Span);
             if (!MoveNext()) break;
         }
         
-        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Expected greater than.", Token.Span);
+        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Generics list definition should end with >.", Token.Span);
 
         return genericsListDefinitionSyntax;
     }
     
-    // TODO: make parsing types include array types
     private GenericsListSyntax ParseGenericsList()
     {
         var genericsListSyntax = new GenericsListSyntax();
             
         MoveNext();
 
-        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("No generics in this list.", Token.Span);
+        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("Generics list should have at least one type.", Token.Span);
             
         while (true)
         {
-            if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected identifier.", Token.Span);
+            if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Diagnoser.AddError("Expected type name.", Token.Span);
                 
-            genericsListSyntax.Generics.Add(new TypeSyntax(Token.Span));
-                
+            genericsListSyntax.Generics.Add(ParseType());
             MoveNext();
+            
             if (Token.Type is TokenType.GreaterThan) break;
-            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected commas.", Token.Span);
+            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected comma.", Token.Span);
             if (!MoveNext()) break;
         }
         
-        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Expected greater than.", Token.Span);
+        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Generics list should end with >.", Token.Span);
 
         return genericsListSyntax;
+    }
+
+    private TypeSyntax ParseType()
+    {
+        TypeSyntax? typeSyntax;
+        GenericsListSyntax? genericsListSyntax = null;
+        
+        if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Diagnoser.AddError("Type should have a valid name.", Token.Span);
+
+        var identifierSpan = Token.Span;
+
+        if (Peek()?.Type is TokenType.LessThan)
+        {
+            MoveNext();
+            genericsListSyntax = ParseGenericsList();
+        }
+
+        if (Peek()?.Type is TokenType.OpenSquareBracket)
+        {
+            MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
+            MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
+                    
+            if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected ].", Token.Span);
+                    
+            typeSyntax = new ArrayTypeSyntax(identifierSpan);
+        }
+        else
+        {
+            typeSyntax = new TypeSyntax(identifierSpan);
+        }
+        
+        typeSyntax.Generics = genericsListSyntax;
+
+        return typeSyntax;
     }
 }
