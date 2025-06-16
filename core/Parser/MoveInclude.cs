@@ -1,4 +1,4 @@
-namespace Fractals.Parser;
+namespace Rich.Parser;
 
 [Flags]
 public enum MoveInclude : byte

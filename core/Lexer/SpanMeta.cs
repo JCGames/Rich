@@ -1,4 +1,4 @@
-namespace Fractals.Lexer;
+namespace Rich.Lexer;
 
 public class SpanMeta
 {

@@ -1,11 +1,11 @@
-using Fractals.Lexer;
-using Fractals.Parser.SyntaxNodes.Expressions;
+using Rich.Lexer;
+using Rich.Parser.SyntaxNodes.Expressions;
 
-namespace Fractals.Parser.SyntaxNodes;
+namespace Rich.Parser.SyntaxNodes;
 
-public class FunctionCallSyntax(SpanMeta nameSpan) : Syntax, IAccessorChainLink
+public class FunctionCallSyntax(IdentifierSyntax identifierSyntax) : Syntax, IAccessorChainLink
 {
-    public SpanMeta NameSpan { get; } = nameSpan;
+    public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public GenericsListSyntax? Generics { get; set; }
     public List<ExpressionSyntax> Arguments { get; } = [];
     
@@ -13,7 +13,7 @@ public class FunctionCallSyntax(SpanMeta nameSpan) : Syntax, IAccessorChainLink
     {
         PrintName();
         
-        Printer.PrintLine($"Name: {NameSpan.Text}");
+        Printer.PrintLine($"Name: {identifierSyntax.Span.Text}");
         
         Generics?.Print();
         

@@ -1,6 +1,6 @@
-using Fractals.Parser.SyntaxNodes;
+using Rich.Parser.SyntaxNodes;
 
-namespace Fractals.Parser;
+namespace Rich.Parser;
 
 public class SyntaxTree
 {

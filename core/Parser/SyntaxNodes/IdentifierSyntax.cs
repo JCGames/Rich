@@ -1,7 +1,7 @@
-using Fractals.Lexer;
-using Fractals.Parser.SyntaxNodes.Expressions;
+using Rich.Lexer;
+using Rich.Parser.SyntaxNodes.Expressions;
 
-namespace Fractals.Parser.SyntaxNodes;
+namespace Rich.Parser.SyntaxNodes;
 
 public class IdentifierSyntax(SpanMeta span) : Syntax, IAccessorChainLink
 {

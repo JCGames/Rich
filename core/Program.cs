@@ -1,6 +1,6 @@
-﻿using Fractals.Diagnostics;
-using Fractals.Lexer;
-using Fractals.Parser;
+﻿using Rich.Diagnostics;
+using Rich.Lexer;
+using Rich.Parser;
 
 #if DEBUG
 var lexer = new Lexer(new FileInfo("test.rich"));
@@ -19,7 +19,7 @@ foreach (var token in tokens)
 }
 #endif
 
-if (Diagnoser.Dump())
+if (Report.Dump())
 {
     return;
 }
@@ -31,7 +31,7 @@ var ast = parser.Run(tokens);
 ast.Root?.Print();
 #endif
 
-if (Diagnoser.Dump())
+if (Report.Dump())
 {
     return;
 }

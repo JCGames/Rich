@@ -1,5 +1,5 @@
-using Fractals.Lexer;
+using Rich.Lexer;
 
-namespace Fractals.Parser.SyntaxNodes;
+namespace Rich.Parser.SyntaxNodes;
 
 public class ArrayTypeSyntax(SpanMeta span) : TypeSyntax(span);

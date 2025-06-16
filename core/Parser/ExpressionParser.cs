@@ -1,10 +1,10 @@
-using Fractals.Diagnostics;
-using Fractals.Lexer;
-using Fractals.Parser.SyntaxNodes;
-using Fractals.Parser.SyntaxNodes.Expressions;
 using Microsoft.VisualBasic;
+using Rich.Diagnostics;
+using Rich.Lexer;
+using Rich.Parser.SyntaxNodes;
+using Rich.Parser.SyntaxNodes.Expressions;
 
-namespace Fractals.Parser;
+namespace Rich.Parser;
 
 public partial class Parser
 {
@@ -40,7 +40,7 @@ public partial class Parser
             if (Token.Type is TokenType.LogicalAnd)
             {
                 MoveNext();
-                left = new LogicalAndSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.LogicalAnd)
                 {
                     Left = left,
                     Right = ParseEquality()
@@ -49,7 +49,7 @@ public partial class Parser
             else if (Token.Type is TokenType.LogicalOr)
             {
                 MoveNext();
-                left = new LogicalOrSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.LogicalOr)
                 {
                     Left = left,
                     Right = ParseEquality()
@@ -69,7 +69,7 @@ public partial class Parser
             if (Token.Type is TokenType.Equals)
             {
                 MoveNext();
-                left = new EqualsSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.Equals)
                 {
                     Left = left,
                     Right = ParseRelational()
@@ -78,7 +78,7 @@ public partial class Parser
             else if (Token.Type is TokenType.NotEquals)
             {
                 MoveNext();
-                left = new NotEqualsSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.NotEquals)
                 {
                     Left = left,
                     Right = ParseRelational()
@@ -101,7 +101,7 @@ public partial class Parser
             if (Token.Type is TokenType.GreaterThan)
             {
                 MoveNext();
-                left = new GreaterThanSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.GreaterThan)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -110,7 +110,7 @@ public partial class Parser
             else if (Token.Type is TokenType.LessThan)
             {
                 MoveNext();
-                left = new LessThanSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.LessThan)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -119,7 +119,7 @@ public partial class Parser
             else if (Token.Type is TokenType.GreaterThanOrEqual)
             {
                 MoveNext();
-                left = new GreaterThanOrEqualSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.GreaterThanOrEqualTo)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -128,7 +128,7 @@ public partial class Parser
             else if (Token.Type is TokenType.LessThanOrEqual)
             {
                 MoveNext();
-                left = new LessThanOrEqualSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.LessThanOrEqualTo)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -148,7 +148,7 @@ public partial class Parser
             if (Token.Type is TokenType.Addition)
             {
                 MoveNext();
-                left = new AdditionSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.Addition)
                 {
                     Left = left,
                     Right = ParseMultiplicative()
@@ -157,7 +157,7 @@ public partial class Parser
             else if (Token.Type is TokenType.Subtraction)
             {
                 MoveNext();
-                left = new SubtractionSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.Subtraction)
                 {
                     Left = left,
                     Right = ParseMultiplicative()
@@ -177,7 +177,7 @@ public partial class Parser
             if (Token.Type is TokenType.Multiplication)
             {
                 MoveNext();
-                left = new MultiplicationSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.Multiplication)
                 {
                     Left = left,
                     Right = ParsePrimary()
@@ -186,7 +186,7 @@ public partial class Parser
             else if (Token.Type is TokenType.Division)
             {
                 MoveNext();
-                left = new DivisionSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.Division)
                 {
                     Left = left,
                     Right = ParsePrimary()
@@ -195,7 +195,7 @@ public partial class Parser
             else if (Token.Type is TokenType.Modulus)
             {
                 MoveNext();
-                left = new ModulusSyntax
+                left = new BinaryOperatorSyntax(BinaryOperatorKind.Modulus)
                 {
                     Left = left,
                     Right = ParsePrimary()
@@ -227,7 +227,7 @@ public partial class Parser
                 var expression = ParseExpression();
                 MoveNext();
             
-                if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected a ).", Token.Span);
+                if (Token.Type is not TokenType.CloseSquareBracket) Report.Error("Expected a ).", Token.Span);
 
                 MoveNext();
             
@@ -247,7 +247,7 @@ public partial class Parser
                 return new NewSyntax(accessor);
             }
             
-            Diagnoser.AddError("Invalid new operation.", Token.Span);
+            Report.Error("Invalid new operation.", Token.Span);
             return null;
         }
         
@@ -273,22 +273,22 @@ public partial class Parser
                 break;
             case TokenType.Subtraction:
                 MoveNext();
-                return new NegationSyntax { Operand = ParsePrimary() };
+                return new UnaryOperatorSyntax(UnaryOperatorKind.Negation) { Operand = ParsePrimary() };
             case TokenType.Not:
                 MoveNext();
-                return new NotSyntax { Operand = ParsePrimary() };
+                return new UnaryOperatorSyntax(UnaryOperatorKind.Not) { Operand = ParsePrimary() };
             case TokenType.OpenParenthesis:
             {
                 MoveNext();
                 result = ParseExpression();
                 MoveNext();
                 
-                if (Token.Type is not TokenType.CloseParenthesis) Diagnoser.AddError("Expected a ).", Token.Span);
+                if (Token.Type is not TokenType.CloseParenthesis) Report.Error("Expected a ).", Token.Span);
             }
                 break;
         }
         
-        if (result is null) Diagnoser.AddError("Invalid term in expression.", Token.Span);
+        if (result is null) Report.Error("Invalid term in expression.", Token.Span);
         
         MoveNext();
         return result;

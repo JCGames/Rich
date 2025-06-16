@@ -1,6 +1,6 @@
-using Fractals.Parser;
+using Rich.Parser;
 
-namespace Fractals.Compiler;
+namespace Rich.Compiler;
 
 public interface ICompiler
 {

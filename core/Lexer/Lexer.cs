@@ -1,6 +1,6 @@
-using Fractals.Diagnostics;
+using Rich.Diagnostics;
 
-namespace Fractals.Lexer;
+namespace Rich.Lexer;
 
 public class Lexer
 {
@@ -217,7 +217,7 @@ public class Lexer
         }
         else
         {
-            Diagnoser.AddError("Missing end quote", GetSpanMeta(stringLiteral));
+            Report.Error("Missing end quote", GetSpanMeta(stringLiteral));
         }
         
         return new Token(TokenType.StringLiteral, GetSpanMeta(stringLiteral));
@@ -239,7 +239,7 @@ public class Lexer
                     containsDecimalPoint = true;
                     break;
                 case '.' when containsDecimalPoint:
-                    Diagnoser.AddError("Too many decimal points.", GetSpanMeta(number));
+                    Report.Error("Too many decimal points.", GetSpanMeta(number));
                     break;
             }
 

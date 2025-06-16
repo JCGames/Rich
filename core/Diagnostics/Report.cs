@@ -1,12 +1,12 @@
-using Fractals.Lexer;
+using Rich.Lexer;
 
-namespace Fractals.Diagnostics;
+namespace Rich.Diagnostics;
 
-public static class Diagnoser
+public static class Report
 {
-    private static readonly List<(string message, SpanMeta span)> _errors = [];
+    private static readonly List<(string message, SpanMeta? span)> _errors = [];
     
-    public static void AddError(string message, SpanMeta span)
+    public static void Error(string message, SpanMeta? span)
     {
         _errors.Add((message, span));
         
@@ -24,7 +24,7 @@ public static class Diagnoser
                 var normal = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
 
-                Console.WriteLine($"{span.FilePath}:({span.Line},{span.Column})");
+                Console.WriteLine($"{span?.FilePath}:({span?.Line},{span?.Column})");
                 Console.WriteLine($"\t{message}");
                 Console.WriteLine();
                 

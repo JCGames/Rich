@@ -1,4 +1,4 @@
-namespace Fractals.Parser.SyntaxNodes.Expressions;
+namespace Rich.Parser.SyntaxNodes.Expressions;
 
 public class AccessorSyntax : Syntax, IAccessorChainLink
 {

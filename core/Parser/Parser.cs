@@ -1,9 +1,9 @@
-using Fractals.Diagnostics;
-using Fractals.Lexer;
-using Fractals.Parser.SyntaxNodes;
-using Fractals.Parser.SyntaxNodes.Expressions;
+using Rich.Diagnostics;
+using Rich.Lexer;
+using Rich.Parser.SyntaxNodes;
+using Rich.Parser.SyntaxNodes.Expressions;
 
-namespace Fractals.Parser;
+namespace Rich.Parser;
 
 public partial class Parser
 {
@@ -87,13 +87,13 @@ public partial class Parser
     private void AssertToken(TokenType expected, string message)
     {
         if (Token.Type == expected) return;
-        Diagnoser.AddError(message, Token.Span);
+        Report.Error(message, Token.Span);
     }
 
     private void UnsertToken(TokenType unexpected, string message)
     {
         if (Token.Type != unexpected) return;
-        Diagnoser.AddError(message, Token.Span);
+        Report.Error(message, Token.Span);
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ public partial class Parser
             case BlockType.Block:
                 if (Token.Type is not TokenType.OpenBracket)
                 {
-                    Diagnoser.AddError("Block must begin with {.", Token.Span);
+                    Report.Error("Block must begin with {.", Token.Span);
                 }
                 MoveNext();
                 
@@ -116,7 +116,7 @@ public partial class Parser
 
                 if (Token.Type is not TokenType.CloseBracket)
                 {
-                    Diagnoser.AddError("Block must end with }.", Token.Span);
+                    Report.Error("Block must end with }.", Token.Span);
                 }
                 MoveNext(MoveInclude.NewLines);
                 break;
@@ -213,18 +213,18 @@ public partial class Parser
                 return statement;
             }
             case TokenType.BuiltInType:
-                Diagnoser.AddError("Type should not be here.", Token.Span);
+                Report.Error("Type should not be here.", Token.Span);
                 break;
         }
 
         if (Token.Type is TokenType.Whitespace or TokenType.EndOfLine) return null;
         
-        Diagnoser.AddError("Invalid statement.", Token.Span);
+        Report.Error("Invalid statement.", Token.Span);
         return null;
 
         void AssertEndOfLine()
         {
-            if (!IsEndOfStatement) Diagnoser.AddError("Statements must end with a new line.", Token.Span);
+            if (!IsEndOfStatement) Report.Error("Statements must end with a new line.", Token.Span);
             MoveNextIfEndOfLine();
         }
     }
@@ -307,7 +307,7 @@ public partial class Parser
             // side of a variable declaration
             if (accessorChain is not IdentifierSyntax accessorChainForReal)
             {
-                Diagnoser.AddError("Expected the name of a variable.", Token.Span);
+                Report.Error("Expected the name of a variable.", Token.Span);
                 return null;
             }
             
@@ -337,7 +337,7 @@ public partial class Parser
             // assuming that this is an auto variable declaration
             else if (Token.Type is not TokenType.Assignment)
             {
-                Diagnoser.AddError("Auto variables require an assignment.", Token.Span);
+                Report.Error("Auto variables require an assignment.", Token.Span);
             }
             
             // parse the assignment of the variable declaration
@@ -360,7 +360,7 @@ public partial class Parser
             MoveNext();
             var expression = ParseExpression();
             MoveNext(MoveInclude.NewLines);
-            return new AssignmentSyntax
+            return new BinaryOperatorSyntax(BinaryOperatorKind.Assignment)
             {
                 Left = (Syntax?)accessorChain,
                 Right = expression
@@ -373,7 +373,7 @@ public partial class Parser
             return (Syntax?)accessorChain;
         }
             
-        Diagnoser.AddError("A solitary accessor chain is not allowed.", Token.Span);
+        Report.Error("A solitary accessor chain is not allowed.", Token.Span);
         return null;
         
         // ensures that the right most node in the
@@ -431,7 +431,7 @@ public partial class Parser
         var condition = ParseExpression();
         MoveNext();
         
-        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("While statement does not have a body because it is missing {.", Token.Span);
+        if (Token.Type is not TokenType.OpenBracket) Report.Error("While statement does not have a body because it is missing {.", Token.Span);
 
         var body = ParseBlock(BlockType.Block);
         
@@ -450,7 +450,7 @@ public partial class Parser
         var condition = ParseExpression();
         MoveNext();
         
-        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("If statement does not have a body because it is missing {.", Token.Span);
+        if (Token.Type is not TokenType.OpenBracket) Report.Error("If statement does not have a body because it is missing {.", Token.Span);
         
         var body = ParseBlock(BlockType.Block);
         
@@ -483,7 +483,7 @@ public partial class Parser
             }
             else
             {
-                Diagnoser.AddError("Invalid if conditional branch.", Token.Span);
+                Report.Error("Invalid if conditional branch.", Token.Span);
             }
         }
 
@@ -505,12 +505,12 @@ public partial class Parser
 
             if (!import.AccessorChain.IsValidPathOrImport())
             {
-                Diagnoser.AddError("Invalid import.", Token.Span);
+                Report.Error("Invalid import.", Token.Span);
             }
         }
         else
         {
-            Diagnoser.AddError("Import could not be found.", Token.Span);
+            Report.Error("Import could not be found.", Token.Span);
         }
         
         MoveNext(MoveInclude.NewLines);
@@ -530,12 +530,12 @@ public partial class Parser
 
             if (!path.AccessorChain.IsValidPathOrImport())
             {
-                Diagnoser.AddError("Invalid path.", Token.Span);
+                Report.Error("Invalid path.", Token.Span);
             }
         }
         else
         {
-            Diagnoser.AddError("Path could not be found.", Token.Span);
+            Report.Error("Path could not be found.", Token.Span);
         }
         
         MoveNext(MoveInclude.NewLines);
@@ -550,7 +550,7 @@ public partial class Parser
     {
         MoveNext();
         
-        if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected type definition name.", Token.Span);
+        if (Token.Type is not TokenType.Identifier) Report.Error("Expected type definition name.", Token.Span);
         var identifierSpan = Token.Span;
 
         MoveNext();
@@ -563,7 +563,7 @@ public partial class Parser
             MoveNext();
         }
 
-        if (Token.Type is not TokenType.OpenBracket) Diagnoser.AddError("Type definition does not have a body because it is missing {.", Token.Span);
+        if (Token.Type is not TokenType.OpenBracket) Report.Error("Type definition does not have a body because it is missing {.", Token.Span);
 
         MoveNext();
 
@@ -579,7 +579,7 @@ public partial class Parser
                 }
                 else
                 {
-                    Diagnoser.AddError("Expected variable declaration.", Token.Span);
+                    Report.Error("Expected variable declaration.", Token.Span);
                 }
             }
             else if (Token.Type is TokenType.KeywordFunction)
@@ -588,12 +588,12 @@ public partial class Parser
             }
             else
             {
-                Diagnoser.AddError("Expected function or variable declaration.", Token.Span);
+                Report.Error("Expected function or variable declaration.", Token.Span);
             }
             MoveNext();
         }
         
-        if (Token.Type is not TokenType.CloseBracket) Diagnoser.AddError($"The body for the type definition {identifierSpan.Text} should end with }}.", Token.Span);
+        if (Token.Type is not TokenType.CloseBracket) Report.Error($"The body for the type definition {identifierSpan.Text} should end with }}.", Token.Span);
         MoveNext(MoveInclude.NewLines);
 
         typeDefinition.GenericsListDefinition = genericsListDefinitionSyntax;
@@ -603,7 +603,7 @@ public partial class Parser
     private FunctionCallSyntax ParseFunctionCall()
     {
         AssertToken(TokenType.Identifier, "Function call is missing a name.");
-        var functionCall = new FunctionCallSyntax(Token.Span);
+        var functionCall = new FunctionCallSyntax(new IdentifierSyntax(Token.Span));
         
         MoveNext();
 
@@ -675,7 +675,7 @@ public partial class Parser
         else
         {
             left = null;
-            Diagnoser.AddError("Expected indexor, identifier or function call.", Token.Span);
+            Report.Error("Expected indexor, identifier or function call.", Token.Span);
         }
 
         // base case
@@ -702,21 +702,21 @@ public partial class Parser
             
         MoveNext();
 
-        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("Generics list definition should have at least one generic type.", Token.Span);
+        if (Token.Type is TokenType.GreaterThan) Report.Error("Generics list definition should have at least one generic type.", Token.Span);
             
         while (true)
         {
-            if (Token.Type is not TokenType.Identifier) Diagnoser.AddError("Expected generic name.", Token.Span);
+            if (Token.Type is not TokenType.Identifier) Report.Error("Expected generic name.", Token.Span);
                 
             genericsListDefinitionSyntax.Identifiers.Add(new IdentifierSyntax(Token.Span));
                 
             MoveNext();
             if (Token.Type is TokenType.GreaterThan) break;
-            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected comma.", Token.Span);
+            if (Token.Type is not TokenType.Comma) Report.Error("Expected comma.", Token.Span);
             if (!MoveNext()) break;
         }
         
-        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Generics list definition should end with >.", Token.Span);
+        if (Token.Type is not TokenType.GreaterThan) Report.Error("Generics list definition should end with >.", Token.Span);
 
         return genericsListDefinitionSyntax;
     }
@@ -727,21 +727,21 @@ public partial class Parser
             
         MoveNext();
 
-        if (Token.Type is TokenType.GreaterThan) Diagnoser.AddError("Generics list should have at least one type.", Token.Span);
+        if (Token.Type is TokenType.GreaterThan) Report.Error("Generics list should have at least one type.", Token.Span);
             
         while (true)
         {
-            if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Diagnoser.AddError("Expected type name.", Token.Span);
+            if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Report.Error("Expected type name.", Token.Span);
                 
             genericsListSyntax.Generics.Add(ParseType());
             MoveNext();
             
             if (Token.Type is TokenType.GreaterThan) break;
-            if (Token.Type is not TokenType.Comma) Diagnoser.AddError("Expected comma.", Token.Span);
+            if (Token.Type is not TokenType.Comma) Report.Error("Expected comma.", Token.Span);
             if (!MoveNext()) break;
         }
         
-        if (Token.Type is not TokenType.GreaterThan) Diagnoser.AddError("Generics list should end with >.", Token.Span);
+        if (Token.Type is not TokenType.GreaterThan) Report.Error("Generics list should end with >.", Token.Span);
 
         return genericsListSyntax;
     }
@@ -751,7 +751,7 @@ public partial class Parser
         TypeSyntax? typeSyntax;
         GenericsListSyntax? genericsListSyntax = null;
         
-        if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Diagnoser.AddError("Type should have a valid name.", Token.Span);
+        if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Report.Error("Type should have a valid name.", Token.Span);
 
         var identifierSpan = Token.Span;
 
@@ -766,7 +766,7 @@ public partial class Parser
             MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
             MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
                     
-            if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected ].", Token.Span);
+            if (Token.Type is not TokenType.CloseSquareBracket) Report.Error("Expected ].", Token.Span);
                     
             typeSyntax = new ArrayTypeSyntax(identifierSpan);
         }

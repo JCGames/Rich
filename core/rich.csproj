@@ -5,13 +5,17 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Fractals</RootNamespace>
+    <RootNamespace>Rich</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <None Update="test.rich">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Semantics\Symbols\" />
   </ItemGroup>
 
 </Project>

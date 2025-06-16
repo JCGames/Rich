@@ -1,6 +1,6 @@
-using Fractals.Parser.SyntaxNodes.Expressions;
+using Rich.Parser.SyntaxNodes.Expressions;
 
-namespace Fractals.Parser.SyntaxNodes;
+namespace Rich.Parser.SyntaxNodes;
 
 public class ImportSyntax(IAccessorChainLink accessorChain) : Syntax
 {

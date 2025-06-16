@@ -1,4 +1,4 @@
-namespace Fractals.Parser.SyntaxNodes;
+namespace Rich.Parser.SyntaxNodes;
 
 public abstract class Syntax
 {

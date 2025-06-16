@@ -1,4 +1,4 @@
-namespace Fractals;
+namespace Rich;
 
 public static class Printer
 {
