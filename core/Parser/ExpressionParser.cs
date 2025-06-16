@@ -214,7 +214,7 @@ public partial class Parser
         {
             var accessor = ParseAccessorChain();
             MoveNext();
-            return accessor;
+            return (Syntax?)accessor;
         }
 
         if (Token.Type is TokenType.KeywordNew)
@@ -274,6 +274,9 @@ public partial class Parser
             case TokenType.Subtraction:
                 MoveNext();
                 return new NegationSyntax { Operand = ParsePrimary() };
+            case TokenType.Not:
+                MoveNext();
+                return new NotSyntax { Operand = ParsePrimary() };
             case TokenType.OpenParenthesis:
             {
                 MoveNext();

@@ -1,6 +1,8 @@
+using Fractals.Parser.SyntaxNodes.Expressions;
+
 namespace Fractals.Parser.SyntaxNodes;
 
-public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax expressionSyntax) : Syntax
+public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax expressionSyntax) : Syntax, IAccessorChainLink
 {
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public ExpressionSyntax IndexExpression { get; } = expressionSyntax;
@@ -13,4 +15,9 @@ public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax e
         
         IndexExpression.Print();
     }
+
+    public bool IsIdentifier => false;
+    public bool IsAccessor => false;
+    public bool IsFunctionCall => false;
+    public bool IsIndexor => true;
 }

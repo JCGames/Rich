@@ -196,6 +196,12 @@ public partial class Parser
                 AssertEndOfLine();
                 return import;
             }
+            case TokenType.KeywordPath:
+            {
+                var path = ParsePath();
+                AssertEndOfLine();
+                return path;
+            }
             // make sure this statement is always at the bottom
             // this will ensure that this statement won't take
             // priority if other statements require and identifier
@@ -356,7 +362,7 @@ public partial class Parser
             MoveNext(MoveInclude.NewLines);
             return new AssignmentSyntax
             {
-                Left = accessorChain,
+                Left = (Syntax?)accessorChain,
                 Right = expression
             };
         }
@@ -364,7 +370,7 @@ public partial class Parser
         else if (IsRightMostAFunctionCall() || acceptAnyAccessorChain)
         {
             MoveNext(MoveInclude.NewLines);
-            return accessorChain;
+            return (Syntax?)accessorChain;
         }
             
         Diagnoser.AddError("A solitary accessor chain is not allowed.", Token.Span);
@@ -487,13 +493,54 @@ public partial class Parser
     /// <summary>
     /// Ensures <see cref="TokenType.EndOfLine"/> is reached.
     /// </summary>
-    private ImportSyntax ParseImport()
+    private ImportSyntax? ParseImport()
     {
         MoveNext();
-        if (Token.Type is not TokenType.StringLiteral) Diagnoser.AddError("Expected string literal.", Token.Span);
-        var stringLiteralSpan = Token.Span;
+        var accessorChain = ParseAccessorChain();
+        ImportSyntax? import = null;
+
+        if (accessorChain is not null)
+        {
+            import = new ImportSyntax(accessorChain);
+
+            if (!import.AccessorChain.IsValidPathOrImport())
+            {
+                Diagnoser.AddError("Invalid import.", Token.Span);
+            }
+        }
+        else
+        {
+            Diagnoser.AddError("Import could not be found.", Token.Span);
+        }
+        
         MoveNext(MoveInclude.NewLines);
-        return new ImportSyntax(stringLiteralSpan);
+
+        return import;
+    }
+
+    private PathSyntax? ParsePath()
+    {
+        MoveNext();
+        var accessorChain = ParseAccessorChain();
+        PathSyntax? path = null;
+
+        if (accessorChain is not null)
+        {
+            path = new PathSyntax(accessorChain);
+
+            if (!path.AccessorChain.IsValidPathOrImport())
+            {
+                Diagnoser.AddError("Invalid path.", Token.Span);
+            }
+        }
+        else
+        {
+            Diagnoser.AddError("Path could not be found.", Token.Span);
+        }
+        
+        MoveNext(MoveInclude.NewLines);
+
+        return path;
     }
 
     /// <summary>
@@ -609,9 +656,9 @@ public partial class Parser
         return new IndexorSyntax(new IdentifierSyntax(identifierSpan), expression);
     }
     
-    private Syntax? ParseAccessorChain()
+    private IAccessorChainLink? ParseAccessorChain()
     {
-        Syntax? left;
+        IAccessorChainLink? left;
         
         if (IsIndexor)
         {
@@ -631,6 +678,7 @@ public partial class Parser
             Diagnoser.AddError("Expected indexor, identifier or function call.", Token.Span);
         }
 
+        // base case
         if (Peek()?.Type is not TokenType.DotAccessor)
         {
             return left;

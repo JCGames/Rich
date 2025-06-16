@@ -2,7 +2,7 @@ using Fractals.Parser.SyntaxNodes.Expressions;
 
 namespace Fractals.Parser.SyntaxNodes;
 
-public class ImportSyntax(IAccessorChainLink accessorChain) : Syntax
+public class PathSyntax(IAccessorChainLink accessorChain) : Syntax
 {
     public IAccessorChainLink AccessorChain { get; } = accessorChain;
     

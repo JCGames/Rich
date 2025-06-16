@@ -106,7 +106,7 @@ public class CppCompiler : ICompiler
         {
             if (syntax is ImportSyntax importSyntax)
             {
-                _streamWriter?.WriteLine($"#include \"{importSyntax.ImportSpan.Text}\"");
+                //_streamWriter?.WriteLine($"#include \"{importSyntax..Span.Text}\"");
             }
         }
     }

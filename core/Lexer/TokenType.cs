@@ -27,6 +27,7 @@ public enum TokenType
     DotAccessor,
     LogicalAnd,
     LogicalOr,
+    Not,
     Equals,
     NotEquals,
     GreaterThan,
@@ -47,5 +48,6 @@ public enum TokenType
     KeywordNew,
     KeywordType,
     KeywordBreak,
-    KeywordContinue
+    KeywordContinue,
+    KeywordPath
 }

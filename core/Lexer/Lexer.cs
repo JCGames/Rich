@@ -166,7 +166,7 @@ public class Lexer
         return identifier switch
         {
             "true" or "false" => new Token(TokenType.Boolean, spanMeta),
-            "int" or "decimal" or "bool" or "str" => new Token(TokenType.BuiltInType, spanMeta),
+            "int" or "decimal" or "bool" or "str" or "byte" => new Token(TokenType.BuiltInType, spanMeta),
             "for" => new Token(TokenType.KeywordFor, spanMeta),
             "to" => new Token(TokenType.KeywordTo, spanMeta),
             "while" => new Token(TokenType.KeywordWhile, spanMeta),
@@ -182,6 +182,7 @@ public class Lexer
             "break" => new Token(TokenType.KeywordBreak, spanMeta),
             "continue" => new Token(TokenType.KeywordContinue, spanMeta),
             "nothing" => new Token(TokenType.Nothing, spanMeta),
+            "path" => new Token(TokenType.KeywordPath, spanMeta),
             _ => new Token(TokenType.Identifier, spanMeta)
         };
     }
@@ -303,6 +304,9 @@ public class Lexer
             case ',':
                 MoveNext();
                 return new Token(TokenType.Comma, GetSpanMeta(null));
+            case '!':
+                MoveNext();
+                return new Token(TokenType.Not, GetSpanMeta(null));
         }
 
         MoveNext();

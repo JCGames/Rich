@@ -1,8 +1,9 @@
 using Fractals.Lexer;
+using Fractals.Parser.SyntaxNodes.Expressions;
 
 namespace Fractals.Parser.SyntaxNodes;
 
-public class FunctionCallSyntax(SpanMeta nameSpan) : Syntax
+public class FunctionCallSyntax(SpanMeta nameSpan) : Syntax, IAccessorChainLink
 {
     public SpanMeta NameSpan { get; } = nameSpan;
     public GenericsListSyntax? Generics { get; set; }
@@ -25,4 +26,9 @@ public class FunctionCallSyntax(SpanMeta nameSpan) : Syntax
         Printer.DecreasePadding();
         Printer.PrintLine("]");
     }
+
+    public bool IsIdentifier => false;
+    public bool IsAccessor => false;
+    public bool IsFunctionCall => true;
+    public bool IsIndexor => false;
 }
