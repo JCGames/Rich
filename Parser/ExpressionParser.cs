@@ -227,7 +227,7 @@ public partial class Parser
                 var expression = ParseExpression();
                 MoveNext();
             
-                if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected a close parenthesis.", Token.Span);
+                if (Token.Type is not TokenType.CloseSquareBracket) Diagnoser.AddError("Expected a ).", Token.Span);
 
                 MoveNext();
             
@@ -280,12 +280,12 @@ public partial class Parser
                 result = ParseExpression();
                 MoveNext();
                 
-                if (Token.Type is not TokenType.CloseParenthesis) Diagnoser.AddError("Expected a close parenthesis.", Token.Span);
+                if (Token.Type is not TokenType.CloseParenthesis) Diagnoser.AddError("Expected a ).", Token.Span);
             }
                 break;
         }
         
-        if (result is null) Diagnoser.AddError($"Unknown primary in expression: {Token.Span.Text}.", Token.Span);
+        if (result is null) Diagnoser.AddError("Invalid term in expression.", Token.Span);
         
         MoveNext();
         return result;

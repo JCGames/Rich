@@ -3,7 +3,6 @@ namespace Fractals.Parser.SyntaxNodes;
 public enum BlockType
 {
     Block,
-    Namespace,
     TopLevel
 }
 
