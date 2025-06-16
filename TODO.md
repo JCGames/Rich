@@ -1,4 +1,4 @@
-- [ ] make parsing types a function
-- [ ] finish implementing generics in the syntax tree
+- [x] make parsing types a function
+- [x] finish implementing generics in the syntax tree
 - [ ] refactor all syntax nodes (clean up)
 - [ ] refactor everything (clean up trash and better error messages/handling)

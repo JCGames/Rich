@@ -2,19 +2,21 @@ namespace Fractals.Parser.SyntaxNodes.Expressions;
 
 public class BinaryOperatorSyntax : Syntax
 {
-    public Syntax? Left { get; set; }
-    public Syntax? Right { get; set; }
+    public Syntax? Left { get; init; }
+    public Syntax? Right { get; init; }
 
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
-        Printer.IncreasePadding();
+        PrintName();
         
         Printer.PrintLine("Left:");
+        Printer.IncreasePadding();
         Left?.Print();
-        Printer.PrintLine("Right:");
-        Right?.Print();
+        Printer.DecreasePadding();
         
+        Printer.PrintLine("Right:");
+        Printer.IncreasePadding();
+        Right?.Print();
         Printer.DecreasePadding();
     }
 }

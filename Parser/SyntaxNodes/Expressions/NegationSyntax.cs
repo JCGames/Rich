@@ -1,6 +1,3 @@
 namespace Fractals.Parser.SyntaxNodes.Expressions;
 
-public class NegationSyntax : UnaryOperatorSyntax
-{
-    
-}
+public class NegationSyntax : UnaryOperatorSyntax;

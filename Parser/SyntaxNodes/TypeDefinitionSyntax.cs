@@ -2,30 +2,36 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class TypeDefinitionSyntax(IdentifierSyntax identifierSyntax) : Syntax
 {
-    public IdentifierSyntax Identifier { get; init; } = identifierSyntax;
-    public List<VariableDeclarationSyntax> Variables { get; set; } = [];
+    public IdentifierSyntax Identifier { get; } = identifierSyntax;
+    public List<VariableDeclarationSyntax> Variables { get; } = [];
     public List<FunctionSyntax> Functions { get; } = [];
     public GenericsListDefinitionSyntax? GenericsListDefinition { get; set; }
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
-        Identifier.Print();
+        PrintName();
 
-        Printer.IncreasePadding();
+        Identifier.Print();
         
+        Printer.PrintLine("Generics:");
+        Printer.IncreasePadding();
+        GenericsListDefinition?.Print();
+        Printer.DecreasePadding();
+        
+        Printer.PrintLine("Fields:");
+        Printer.IncreasePadding();
         foreach (var v in Variables)
         {
             v.Print();
         }
+        Printer.DecreasePadding();
 
+        Printer.PrintLine("Functions:");
+        Printer.IncreasePadding();
         foreach (var f in Functions)
         {
             f.Print();
         }
-        
-        GenericsListDefinition?.Print();
-        
         Printer.DecreasePadding();
     }
 }

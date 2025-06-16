@@ -2,18 +2,15 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class GenericsListDefinitionSyntax : Syntax
 {
-    public List<IdentifierSyntax> Identifiers { get; set; } = [];
+    public List<IdentifierSyntax> Identifiers { get; } = [];
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
-        Printer.IncreasePadding();
-
+        PrintName();
+        
         foreach (var identifier in Identifiers)
         {
             identifier.Print();
         }
-        
-        Printer.DecreasePadding();
     }
 }

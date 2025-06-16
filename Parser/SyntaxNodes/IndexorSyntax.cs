@@ -7,12 +7,10 @@ public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax e
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
-        Printer.IncreasePadding();
+        PrintName();
         
         Identifier.Print();
-        IndexExpression.Print();
         
-        Printer.DecreasePadding();
+        IndexExpression.Print();
     }
 }

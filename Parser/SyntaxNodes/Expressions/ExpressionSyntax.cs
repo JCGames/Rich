@@ -2,15 +2,14 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class ExpressionSyntax(Syntax? root) : Syntax
 {
-    public Syntax? Root { get; set; } = root;
+    public Syntax? Root { get; } = root;
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
+        PrintName();
+        
         Printer.IncreasePadding();
-        
         Root?.Print();
-        
         Printer.DecreasePadding();
     }
 }

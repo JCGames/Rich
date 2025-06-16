@@ -4,19 +4,24 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class VariableDeclarationSyntax(IdentifierSyntax identifier, TypeSyntax? type, ExpressionSyntax? expressionSyntax) : Syntax
 {
-    public IdentifierSyntax Identifier { get; init; } = identifier;
-    public TypeSyntax? Type { get; set; } = type;
-    public ExpressionSyntax? Expression { get; init; } = expressionSyntax;
+    public IdentifierSyntax Identifier { get; } = identifier;
+    public TypeSyntax? Type { get; } = type;
+    public ExpressionSyntax? Expression { get; } = expressionSyntax;
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
-        Identifier?.Print();
-        Type?.Print();
+        PrintName();
+        
+        Identifier.Print();
+        
+        Printer.PrintLine("Type:");
         Printer.IncreasePadding();
+        Type?.Print();
+        Printer.DecreasePadding();
         
+        Printer.PrintLine("Assigned To:");
+        Printer.IncreasePadding();
         Expression?.Print();
-        
         Printer.DecreasePadding();
     }
 }

@@ -2,15 +2,14 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class NewSyntax(Syntax accessorChain) : Syntax
 {
-    public Syntax AccessorChain { get; set; } = accessorChain;
+    public Syntax AccessorChain { get; } = accessorChain;
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
+        PrintName();
+        
         Printer.IncreasePadding();
-        
         AccessorChain.Print();
-        
         Printer.DecreasePadding();
     }
 }

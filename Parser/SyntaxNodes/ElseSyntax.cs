@@ -2,15 +2,12 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class ElseSyntax : LikeIfSyntax
 {
-    public BlockSyntax Body { get; set; } = null!;
+    public BlockSyntax Body { get; init; } = null!;
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
-        Printer.IncreasePadding();
+        PrintName();
         
         Body.Print();
-        
-        Printer.DecreasePadding();
     }
 }

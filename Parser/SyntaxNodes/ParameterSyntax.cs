@@ -4,17 +4,18 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class ParameterSyntax(SpanMeta nameSpan, TypeSyntax typeSyntax) : Syntax
 {
-    public SpanMeta NameSpan { get; set; } = nameSpan;
-    public TypeSyntax Type { get; set; } = typeSyntax;
+    public SpanMeta NameSpan { get; } = nameSpan;
+    public TypeSyntax Type { get; } = typeSyntax;
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
+        PrintName();
+        
+        Printer.PrintLine($"Name: {NameSpan.Text}");
+        Printer.PrintLine("Type:");
+        
         Printer.IncreasePadding();
-        
-        Printer.PrintLine($"Parameter Name: {NameSpan.Text}");
         Type.Print();
-        
         Printer.DecreasePadding();
     }
 }

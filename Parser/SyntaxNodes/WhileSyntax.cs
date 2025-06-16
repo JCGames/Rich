@@ -2,17 +2,18 @@ namespace Fractals.Parser.SyntaxNodes;
 
 public class WhileSyntax(ExpressionSyntax condition) : Syntax
 {
-    public ExpressionSyntax Condition { get; set; } = condition;
-    public BlockSyntax Body { get; set; } = null!;
+    public ExpressionSyntax Condition { get; } = condition;
+    public BlockSyntax Body { get; init; } = null!;
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
+        PrintName();
+        
+        Printer.PrintLine("Condition:");
         Printer.IncreasePadding();
-        
         Condition.Print();
-        Body.Print();
-        
         Printer.DecreasePadding();
+        
+        Body.Print();
     }
 }

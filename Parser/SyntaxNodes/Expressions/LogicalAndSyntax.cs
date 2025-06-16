@@ -1,6 +1,3 @@
 namespace Fractals.Parser.SyntaxNodes.Expressions;
 
-public class LogicalAndSyntax : BinaryOperatorSyntax
-{
-    
-}
+public class LogicalAndSyntax : BinaryOperatorSyntax;

@@ -6,11 +6,10 @@ public class ReturnSyntax(ExpressionSyntax? expressionSyntax) : Syntax
 
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
+        PrintName();
+        
         Printer.IncreasePadding();
-        
         Expression?.Print();
-        
         Printer.DecreasePadding();
     }
 }

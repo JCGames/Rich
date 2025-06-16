@@ -6,6 +6,6 @@ public class NothingSyntax : Syntax
 {
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
+        PrintName();
     }
 }

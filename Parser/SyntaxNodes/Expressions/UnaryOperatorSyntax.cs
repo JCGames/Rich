@@ -2,13 +2,13 @@ namespace Fractals.Parser.SyntaxNodes.Expressions;
 
 public class UnaryOperatorSyntax : Syntax
 {
-    public Syntax? Operand { get; set; }
+    public Syntax? Operand { get; init; }
     
     public override void Print()
     {
-        Printer.PrintLine(GetType().Name);
+        PrintName();
+        
         Printer.IncreasePadding();
-        Printer.PrintLine("Operand:");
         Operand?.Print();
         Printer.DecreasePadding();
     }
