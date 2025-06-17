@@ -242,7 +242,7 @@ public partial class Parser
                 return new NewSyntax(functionCall);
             }
             
-            if (fc is AccessorSyntax { Left: FunctionCallSyntax } accessor)
+            if (fc is AccessorChainSyntax accessor && accessor.Chain.FirstOrDefault() is FunctionCallSyntax)
             {
                 return new NewSyntax(accessor);
             }

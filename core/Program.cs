@@ -1,6 +1,7 @@
 ﻿using Rich.Diagnostics;
 using Rich.Lexer;
 using Rich.Parser;
+using Rich.Semantics;
 
 #if DEBUG
 var lexer = new Lexer(new FileInfo("test.rich"));
@@ -30,6 +31,13 @@ var ast = parser.Run(tokens);
 #if DEBUG
 ast.Root?.Print();
 #endif
+
+if (Report.Dump())
+{
+    return;
+}
+
+SemanticAnalyzer.Analyze([ast]);
 
 if (Report.Dump())
 {

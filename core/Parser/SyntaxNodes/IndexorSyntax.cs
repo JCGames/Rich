@@ -2,7 +2,7 @@ using Rich.Parser.SyntaxNodes.Expressions;
 
 namespace Rich.Parser.SyntaxNodes;
 
-public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax expressionSyntax) : Syntax, IAccessorChainLink
+public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax expressionSyntax) : Syntax
 {
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public ExpressionSyntax IndexExpression { get; } = expressionSyntax;
@@ -13,11 +13,9 @@ public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax e
         
         Identifier.Print();
         
+        Printer.PrintLine("Index:");
+        Printer.IncreasePadding();
         IndexExpression.Print();
+        Printer.DecreasePadding();
     }
-
-    public bool IsIdentifier => false;
-    public bool IsAccessor => false;
-    public bool IsFunctionCall => false;
-    public bool IsIndexor => true;
 }

@@ -2,6 +2,7 @@ using Rich.Diagnostics;
 using Rich.Lexer;
 using Rich.Parser.SyntaxNodes;
 using Rich.Parser.SyntaxNodes.Expressions;
+using Rich.Parser.SyntaxNodes.Extensions;
 
 namespace Rich.Parser;
 
@@ -305,7 +306,7 @@ public partial class Parser
             
             // only an identifier is allowed on the left
             // side of a variable declaration
-            if (accessorChain is not IdentifierSyntax accessorChainForReal)
+            if (accessorChain?.Chain.FirstOrDefault() is not IdentifierSyntax accessorChainForReal)
             {
                 Report.Error("Expected the name of a variable.", Token.Span);
                 return null;
@@ -362,35 +363,19 @@ public partial class Parser
             MoveNext(MoveInclude.NewLines);
             return new BinaryOperatorSyntax(BinaryOperatorKind.Assignment)
             {
-                Left = (Syntax?)accessorChain,
+                Left = accessorChain,
                 Right = expression
             };
         }
         // this must be a function call or just simply an accessor chain 
-        else if (IsRightMostAFunctionCall() || acceptAnyAccessorChain)
+        else if (accessorChain.IsRightMostAFunctionCall() || acceptAnyAccessorChain)
         {
             MoveNext(MoveInclude.NewLines);
-            return (Syntax?)accessorChain;
+            return accessorChain;
         }
             
         Report.Error("A solitary accessor chain is not allowed.", Token.Span);
         return null;
-        
-        // ensures that the right most node in the
-        // accessor chain is a function call
-        bool IsRightMostAFunctionCall()
-        {
-            if (accessorChain is AccessorSyntax accessor)
-            {
-                while (accessor.Right is AccessorSyntax right)
-                {
-                    accessor = right;
-                }
-                
-                return accessor.Right is FunctionCallSyntax;
-            }
-            return accessorChain is FunctionCallSyntax;
-        }
     }
     
     /// <summary>
@@ -503,7 +488,7 @@ public partial class Parser
         {
             import = new ImportSyntax(accessorChain);
 
-            if (!import.AccessorChain.IsValidPathOrImport())
+            if (!import.AccessorChainChain.IsOnlyIdentifiers())
             {
                 Report.Error("Invalid import.", Token.Span);
             }
@@ -528,7 +513,7 @@ public partial class Parser
         {
             path = new PathSyntax(accessorChain);
 
-            if (!path.AccessorChain.IsValidPathOrImport())
+            if (!path.AccessorChainChain.IsOnlyIdentifiers())
             {
                 Report.Error("Invalid path.", Token.Span);
             }
@@ -656,44 +641,41 @@ public partial class Parser
         return new IndexorSyntax(new IdentifierSyntax(identifierSpan), expression);
     }
     
-    private IAccessorChainLink? ParseAccessorChain()
+    private AccessorChainSyntax? ParseAccessorChain()
     {
-        IAccessorChainLink? left;
-        
-        if (IsIndexor)
-        {
-            left = ParseIndexor();
-        }
-        else if (IsFunctionCall)
-        {
-            left = ParseFunctionCall();
-        }
-        else if (Token.Type is TokenType.Identifier)
-        {
-            left = new IdentifierSyntax(Token.Span);
-        }
-        else
-        {
-            left = null;
-            Report.Error("Expected indexor, identifier or function call.", Token.Span);
-        }
+        var accessor = new AccessorChainSyntax();
 
-        // base case
-        if (Peek()?.Type is not TokenType.DotAccessor)
+        while (true)
         {
-            return left;
+            if (IsIndexor)
+            {
+                accessor.Chain.Add(ParseIndexor());
+            }
+            else if (IsFunctionCall)
+            {
+                accessor.Chain.Add(ParseFunctionCall());
+            }
+            else if (Token.Type is TokenType.Identifier)
+            {
+                accessor.Chain.Add(new IdentifierSyntax(Token.Span));
+            }
+            else
+            {
+                Report.Error("Expected indexor, identifier or function call.", Token.Span);
+                return null;
+            }
+
+            // base case
+            if (Peek()?.Type is not TokenType.DotAccessor)
+            {
+                break;
+            }
+        
+            MoveNext();
+            MoveNext();
         }
         
-        MoveNext();
-        MoveNext();
-
-        var right = ParseAccessorChain();
-        
-        return new AccessorSyntax
-        {
-            Left = left,
-            Right = right
-        };
+        return accessor;
     }
 
     private GenericsListDefinitionSyntax ParseGenericsListDefinition()

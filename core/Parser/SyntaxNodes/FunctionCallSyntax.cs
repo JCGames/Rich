@@ -3,7 +3,7 @@ using Rich.Parser.SyntaxNodes.Expressions;
 
 namespace Rich.Parser.SyntaxNodes;
 
-public class FunctionCallSyntax(IdentifierSyntax identifierSyntax) : Syntax, IAccessorChainLink
+public class FunctionCallSyntax(IdentifierSyntax identifierSyntax) : Syntax
 {
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public GenericsListSyntax? Generics { get; set; }
@@ -26,9 +26,4 @@ public class FunctionCallSyntax(IdentifierSyntax identifierSyntax) : Syntax, IAc
         Printer.DecreasePadding();
         Printer.PrintLine("]");
     }
-
-    public bool IsIdentifier => false;
-    public bool IsAccessor => false;
-    public bool IsFunctionCall => true;
-    public bool IsIndexor => false;
 }
