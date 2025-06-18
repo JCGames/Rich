@@ -12,9 +12,10 @@ public partial class Parser
     private int _current;
     private Token Token => _tokens[_current];
     private bool IsEndOfTokens => Token.Type is TokenType.EndOfFile;
-    private bool IsFunctionCall => Token.Type is TokenType.Identifier && (Peek()?.Type is TokenType.OpenParenthesis || Peek()?.Type is TokenType.LessThan);
+    private bool IsFunctionCall => IsPossibleType && (Peek()?.Type is TokenType.OpenParenthesis || Peek()?.Type is TokenType.LessThan);
     private bool IsEndOfStatement => Token.Type is TokenType.EndOfLine or TokenType.EndOfFile or TokenType.CloseBracket;
-    private bool IsIndexor => Token.Type is TokenType.Identifier && Peek()?.Type is TokenType.OpenSquareBracket;
+    private bool IsIndexor => IsPossibleType && Peek()?.Type is TokenType.OpenSquareBracket;
+    private bool IsPossibleType => Token.Type is TokenType.Identifier or TokenType.BuiltInType;
     
     public SyntaxTree Run(List<Token> tokens)
     {
@@ -90,6 +91,12 @@ public partial class Parser
     private void AssertToken(TokenType expected, string message)
     {
         if (Token.Type == expected) return;
+        Report.Error(message, Token.Span);
+    }
+    
+    private void AssertToken(List<TokenType> expected, string message)
+    {
+        if (expected.Any(x => x == Token.Type)) return;
         Report.Error(message, Token.Span);
     }
 
@@ -537,7 +544,7 @@ public partial class Parser
     {
         MoveNext();
         
-        if (Token.Type is not TokenType.Identifier && !(Token.Span.FilePath.EndsWith("builtintypes.rich") && Token.Type is TokenType.BuiltInType)) Report.Error("Expected type definition name.", Token.Span);
+        if (Token.Type is not TokenType.Identifier) Report.Error("Expected type definition name.", Token.Span);
         var identifierSpan = Token.Span;
 
         MoveNext();
@@ -589,7 +596,7 @@ public partial class Parser
     
     private FunctionCallSyntax ParseFunctionCall()
     {
-        AssertToken(TokenType.Identifier, "Function call is missing a name.");
+        AssertToken([TokenType.Identifier, TokenType.BuiltInType], "Function call is missing a name.");
         var functionCall = new FunctionCallSyntax(new IdentifierSyntax(Token.Span));
         
         MoveNext();
@@ -626,7 +633,7 @@ public partial class Parser
     
     private IndexorSyntax ParseIndexor()
     {
-        AssertToken(TokenType.Identifier, "Indexor is missing a name.");
+        AssertToken([TokenType.Identifier, TokenType.BuiltInType], "Indexor is missing a name.");
         var identifierSpan = Token.Span;
         MoveNext();
         
@@ -730,7 +737,7 @@ public partial class Parser
         return genericsListSyntax;
     }
 
-    private TypeSyntax ParseType()
+    private TypeSyntax ParseType(bool allowArrayType = true)
     {
         TypeSyntax? typeSyntax;
         GenericsListSyntax? genericsListSyntax = null;
@@ -746,7 +753,7 @@ public partial class Parser
             genericsListSyntax = ParseGenericsList();
         }
 
-        if (Peek()?.Type is TokenType.OpenSquareBracket)
+        if (Peek()?.Type is TokenType.OpenSquareBracket && allowArrayType)
         {
             MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);
             MoveNext(MoveInclude.Whitespace | MoveInclude.NewLines);

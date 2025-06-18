@@ -214,41 +214,24 @@ public partial class Parser
         {
             var accessor = ParseAccessorChain();
             MoveNext();
-            return (Syntax?)accessor;
+            return accessor;
         }
 
         if (Token.Type is TokenType.KeywordNew)
         {
             MoveNext();
             
-            if (Token.Type is TokenType.OpenSquareBracket)
+            var accessorChain = ParseAccessorChain();
+            MoveNext();
+            
+            switch (accessorChain?.Chain.FirstOrDefault())
             {
-                MoveNext();
-                var expression = ParseExpression();
-                MoveNext();
-            
-                if (Token.Type is not TokenType.CloseSquareBracket) Report.Error("Expected a ).", Token.Span);
-
-                MoveNext();
-            
-                return new ArrayInitializerSyntax(expression);
+                case FunctionCallSyntax or IndexorSyntax:
+                    return new NewSyntax(accessorChain);
+                default:
+                    Report.Error("Invalid new operation.", Token.Span);
+                    return null;
             }
-            
-            var fc = ParseStatementThatStartsWithIdentifier(acceptAnyAccessorChain: true);
-            MoveNextIfEndOfLine();
-
-            if (fc is FunctionCallSyntax functionCall)
-            {
-                return new NewSyntax(functionCall);
-            }
-            
-            if (fc is AccessorChainSyntax accessor && accessor.Chain.FirstOrDefault() is FunctionCallSyntax)
-            {
-                return new NewSyntax(accessor);
-            }
-            
-            Report.Error("Invalid new operation.", Token.Span);
-            return null;
         }
         
         switch (Token.Type)
