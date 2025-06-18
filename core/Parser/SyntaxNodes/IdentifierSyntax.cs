@@ -11,4 +11,9 @@ public class IdentifierSyntax(SpanMeta span) : Syntax
     {
         Printer.PrintLine($"{GetType().Name}: {Span.Text}");
     }
+
+    public override string ToString()
+    {
+        return Span.Text ?? string.Empty;
+    }
 }

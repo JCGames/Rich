@@ -13,4 +13,14 @@ public class GenericsListDefinitionSyntax : Syntax
             identifier.Print();
         }
     }
+
+    public override string ToString()
+    {
+        return $"<{string.Join(',', Identifiers)}>";
+    }
+
+    public string ToNumberOfGenericsString()
+    {
+        return Identifiers.Count > 0 ? $"'{Identifiers.Count}" : string.Empty;
+    }
 }

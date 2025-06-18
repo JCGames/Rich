@@ -2,9 +2,9 @@ using Rich.Lexer;
 
 namespace Rich.Parser.SyntaxNodes;
 
-public class FunctionSyntax(SpanMeta nameSpan) : Syntax
+public class FunctionSyntax(IdentifierSyntax identifierSyntax) : Syntax
 {
-    public SpanMeta NameSpan { get; } = nameSpan;
+    public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public GenericsListDefinitionSyntax? GenericsListDefinition { get; set; }
     public List<ParameterSyntax> Parameters { get; } = [];
     public TypeSyntax? ReturnType { get; set; }
@@ -14,7 +14,7 @@ public class FunctionSyntax(SpanMeta nameSpan) : Syntax
     {
         PrintName();
         
-        Printer.PrintLine($"Name: {NameSpan.Text}");
+        Printer.PrintLine($"Name: {Identifier.Span.Text}");
         
         Printer.PrintLine("Returns:");
         Printer.IncreasePadding();

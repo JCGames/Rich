@@ -14,8 +14,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Semantics\Symbols\" />
-  </ItemGroup>
-
 </Project>

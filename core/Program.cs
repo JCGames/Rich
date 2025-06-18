@@ -3,14 +3,14 @@ using Rich.Lexer;
 using Rich.Parser;
 using Rich.Semantics;
 
-#if DEBUG
+#if DEBUG // only run this in debug mode
 var lexer = new Lexer(new FileInfo("test.rich"));
-#else
+#else // run this in release mode
 if (args.Length == 0) return;
 
+var buildInTypesLexer = new Lexer(new FileInfo("builtintypes.rich"));
 var lexer = new Lexer(new FileInfo(args[0]));
 #endif
-var parser = new Parser();
 var tokens = lexer.Run();
 
 #if DEBUG
@@ -26,6 +26,7 @@ if (Report.Dump())
 }
 
 Console.WriteLine();
+var parser = new Parser();
 var ast = parser.Run(tokens);
 
 #if DEBUG
@@ -37,7 +38,7 @@ if (Report.Dump())
     return;
 }
 
-SemanticAnalyzer.Analyze([ast]);
+SemanticAnalyzer.Run([ast]);
 
 if (Report.Dump())
 {

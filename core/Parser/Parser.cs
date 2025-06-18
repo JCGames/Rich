@@ -19,11 +19,13 @@ public partial class Parser
     public SyntaxTree Run(List<Token> tokens)
     {
         _tokens = tokens;
-        return new SyntaxTree
+        var syntaxTree = new SyntaxTree
         {
             FilePath = _tokens[0].Span.FilePath,
             Root = ParseBlock(BlockType.TopLevel)
         };
+
+        return syntaxTree;
     }
     
     /// <summary>
@@ -49,7 +51,7 @@ public partial class Parser
                 Token.Type is TokenType.Whitespace or TokenType.EndOfLine
         };
 
-        while (_current < _tokens.Count - 1 && predicate())
+        while (_current < _tokens.Count - 1 && (predicate() || Token.Type is TokenType.Comment))
         {
             _current++;
         }
@@ -218,7 +220,7 @@ public partial class Parser
                 break;
         }
 
-        if (Token.Type is TokenType.Whitespace or TokenType.EndOfLine) return null;
+        if (Token.Type is TokenType.Whitespace or TokenType.EndOfLine or TokenType.Comment) return null;
         
         Report.Error("Invalid statement.", Token.Span);
         return null;
@@ -239,7 +241,7 @@ public partial class Parser
         MoveNext();
         
         AssertToken(TokenType.Identifier, "Function is missing a name.");
-        var function = new FunctionSyntax(Token.Span);
+        var function = new FunctionSyntax(new IdentifierSyntax(Token.Span));
         
         MoveNext();
 
@@ -535,7 +537,7 @@ public partial class Parser
     {
         MoveNext();
         
-        if (Token.Type is not TokenType.Identifier) Report.Error("Expected type definition name.", Token.Span);
+        if (Token.Type is not TokenType.Identifier && !(Token.Span.FilePath.EndsWith("builtintypes.rich") && Token.Type is TokenType.BuiltInType)) Report.Error("Expected type definition name.", Token.Span);
         var identifierSpan = Token.Span;
 
         MoveNext();
@@ -715,7 +717,7 @@ public partial class Parser
         {
             if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Report.Error("Expected type name.", Token.Span);
                 
-            genericsListSyntax.Generics.Add(ParseType());
+            genericsListSyntax.Types.Add(ParseType());
             MoveNext();
             
             if (Token.Type is TokenType.GreaterThan) break;
@@ -736,6 +738,7 @@ public partial class Parser
         if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Report.Error("Type should have a valid name.", Token.Span);
 
         var identifierSpan = Token.Span;
+        var isBuiltIn = Token.Type is TokenType.BuiltInType;
 
         if (Peek()?.Type is TokenType.LessThan)
         {
@@ -757,7 +760,8 @@ public partial class Parser
             typeSyntax = new TypeSyntax(identifierSpan);
         }
         
-        typeSyntax.Generics = genericsListSyntax;
+        typeSyntax.GenericsList = genericsListSyntax;
+        typeSyntax.IsBuiltIn = isBuiltIn;
 
         return typeSyntax;
     }

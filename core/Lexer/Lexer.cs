@@ -148,6 +148,13 @@ public class Lexer
             return new Token(TokenType.Assignment, GetSpanMeta(null));
         }
 
+        if (_current is '/' && Peek() is '/')
+        {
+            MoveNext();
+            MoveNext();
+            return ConsumeSingleLineComment();
+        }
+        
         return TryConsumeSingleCharacterToken();
     }
 
@@ -247,6 +254,19 @@ public class Lexer
         }
         
         return new Token(containsDecimalPoint ? TokenType.Decimal : TokenType.Integer, GetSpanMeta(number));
+    }
+
+    private Token ConsumeSingleLineComment()
+    {
+        var comment = string.Empty;
+            
+        while (!IsWindowsEndOfLine && !IsLinuxEndOfLine && !IsMaxOsEndOfLine)
+        {
+            comment += _current;
+            if (!MoveNext()) break;
+        }
+        
+        return new Token(TokenType.Comment, GetSpanMeta(comment));
     }
 
     private Token? TryConsumeSingleCharacterToken()

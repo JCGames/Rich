@@ -49,5 +49,6 @@ public enum TokenType
     KeywordType,
     KeywordBreak,
     KeywordContinue,
-    KeywordPath
+    KeywordPath,
+    Comment,
 }
