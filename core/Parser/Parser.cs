@@ -304,7 +304,7 @@ public partial class Parser
     /// <summary>
     /// Ensures <see cref="TokenType.EndOfLine"/> is reached most of the time.
     /// </summary>
-    private Syntax? ParseStatementThatStartsWithIdentifier(bool acceptAnyAccessorChain = false)
+    private Syntax? ParseStatementThatStartsWithIdentifier()
     {
         var accessorChain = ParseAccessorChain();
         
@@ -377,7 +377,7 @@ public partial class Parser
             };
         }
         // this must be a function call or just simply an accessor chain 
-        else if (accessorChain.IsRightMostAFunctionCall() || acceptAnyAccessorChain)
+        else if (accessorChain.IsRightMostAFunctionCall())
         {
             MoveNext(MoveInclude.NewLines);
             return accessorChain;

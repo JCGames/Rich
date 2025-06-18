@@ -1,3 +1,5 @@
+using Rich.Semantics;
+
 namespace Rich.Parser.SyntaxNodes;
 
 public abstract class Syntax

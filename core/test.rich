@@ -1,0 +1,22 @@
+type List<T> 
+{
+
+}
+
+type List2<T>
+{
+
+}
+
+_a: int
+a: decimal
+
+function doWhile()
+{
+
+}
+
+function do()
+{
+
+}

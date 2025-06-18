@@ -8,7 +8,6 @@ public class TypeSyntax(SpanMeta span) : Syntax
     public bool IsBuiltIn { get; set; }
     public SpanMeta Span { get; } = span;
     public GenericsListSyntax? GenericsList { get; set; }
-    public TypeBinding? TypeBinding { get; set; }
     
     public override void Print()
     {

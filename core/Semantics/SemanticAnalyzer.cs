@@ -17,6 +17,8 @@ public class SemanticAnalyzer
             if (syntaxTree.Root is null) continue;
             
             CollectTypeDefinitions(syntaxTree.Root, GlobalScope);
+            CollectFunctions(syntaxTree.Root, GlobalScope);
+            CollectVariables(syntaxTree.Root, GlobalScope);
         }
     }
 
@@ -31,7 +33,43 @@ public class SemanticAnalyzer
                 
                 if (!scope.TryAddType(typeName, typeDefinitionSyntax, out var alreadyExistingTypeDefinition))
                 {
-                    Report.Error($"The type {typeName} on line {typeDefinitionSyntax.Identifier.Span.Line} is already defined here.", alreadyExistingTypeDefinition?.Identifier.Span);
+                    var otherLocation = alreadyExistingTypeDefinition?.Identifier.Span.FilePath + ":" + alreadyExistingTypeDefinition?.Identifier.Span.Line;
+                    Report.Error($"The type {typeName} is already defined at {otherLocation}.", typeDefinitionSyntax.Identifier.Span);
+                }
+            }
+        }
+    }
+
+    private static void CollectFunctions(BlockSyntax blockSyntax, Scope scope)
+    {
+        foreach (var syntax in blockSyntax.Children)
+        {
+            if (syntax is FunctionSyntax functionSyntax)
+            {
+                var functionName = functionSyntax.Identifier.Span.Text +
+                                   functionSyntax.GenericsListDefinition?.ToNumberOfGenericsString();
+
+                if (!scope.TryAddFunction(functionName, functionSyntax, out var alreadyExistingFunction))
+                {
+                    var otherLocation = alreadyExistingFunction?.Identifier.Span.FilePath + ":" + alreadyExistingFunction?.Identifier.Span.Line;
+                    Report.Error($"The function {functionName} is already defined at {otherLocation}.", functionSyntax.Identifier.Span);
+                }
+            }
+        }
+    }
+
+    private static void CollectVariables(BlockSyntax blockSyntax, Scope scope)
+    {
+        foreach (var syntax in blockSyntax.Children)
+        {
+            if (syntax is VariableDeclarationSyntax variableDeclarationSyntax)
+            {
+                var variableName = variableDeclarationSyntax.Identifier.Span.Text ?? throw new Exception("AHHHHH");
+                
+                if (!scope.TryAddVariable(variableName, variableDeclarationSyntax, out var alreadyExistingVariable))
+                {
+                    var otherLocation = alreadyExistingVariable?.Identifier.Span.FilePath + ":" + alreadyExistingVariable?.Identifier.Span.Line;
+                    Report.Error($"The variable {variableName} is already defined at {otherLocation}.", variableDeclarationSyntax.Identifier.Span);
                 }
             }
         }
