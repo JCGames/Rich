@@ -8,94 +8,31 @@ public class Scope
     public Dictionary<string, TypeDefinitionSyntax> Types { get; } = [];
     public Dictionary<string, FunctionSyntax> Functions { get; } = [];
     public Dictionary<string, VariableDeclarationSyntax> Variables { get; } = [];
-
-    public bool TryAddType(string typeName, TypeDefinitionSyntax typeDefinitionSyntax, out TypeDefinitionSyntax? alreadyExistingTypeDefinition)
+    
+    /// <returns>Null if type was added, otherwise returns the type that is already added.</returns>
+    public TypeDefinitionSyntax? TryAddType(string typeName, TypeDefinitionSyntax typeDefinitionSyntax)
     {
-        var result = FindTypeInScopes(typeName);
-        alreadyExistingTypeDefinition = result.typeDefinitionSyntax;
+        if (!Types.TryAdd(typeName, typeDefinitionSyntax))
+            return Types[typeName];
         
-        if (result.success)
-        {
-            return false;
-        }
-        
-        Types.Add(typeName, typeDefinitionSyntax);
-
-        return true;
-    }
-
-    private (bool success, TypeDefinitionSyntax? typeDefinitionSyntax) FindTypeInScopes(string typeName)
-    {
-        if (Types.TryGetValue(typeName, out var type))
-        {
-            return (true, type);
-        }
-        
-        if (Parent is not null)
-        {
-            return Parent.FindTypeInScopes(typeName);
-        }
-
-        return (false, null);
+        return null;
     }
     
-    public bool TryAddFunction(string functionName, FunctionSyntax functionSyntax, out FunctionSyntax? alreadyExistingFunction)
+    /// <returns>Null if function was added, otherwise returns the function that is already added.</returns>
+    public FunctionSyntax? TryAddFunction(string functionName, FunctionSyntax functionSyntax)
     {
-        var result = FindFunctionInScopes(functionName);
-        alreadyExistingFunction = result.functionSyntax;
+        if (!Functions.TryAdd(functionName, functionSyntax))
+            return Functions[functionName];
         
-        if (result.success)
-        {
-            return false;
-        }
-        
-        Functions.Add(functionName, functionSyntax);
-
-        return true;
-    }
-
-    private (bool success, FunctionSyntax? functionSyntax) FindFunctionInScopes(string functionName)
-    {
-        if (Functions.TryGetValue(functionName, out var type))
-        {
-            return (true, type);
-        }
-        
-        if (Parent is not null)
-        {
-            return Parent.FindFunctionInScopes(functionName);
-        }
-
-        return (false, null);
+        return null;
     }
     
-    public bool TryAddVariable(string typeName, VariableDeclarationSyntax variableDeclarationSyntax, out VariableDeclarationSyntax? alreadyExistingVariableDeclaration)
+    /// <returns>Null if variable was added, otherwise returns the variable that is already added.</returns>
+    public VariableDeclarationSyntax? TryAddVariable(string variableName, VariableDeclarationSyntax variableDeclarationSyntax)
     {
-        var result = FindVariableInScopes(typeName);
-        alreadyExistingVariableDeclaration = result.variableDeclarationSyntax;
+        if (!Variables.TryAdd(variableName, variableDeclarationSyntax))
+            return Variables[variableName];
         
-        if (result.success)
-        {
-            return false;
-        }
-        
-        Variables.Add(typeName, variableDeclarationSyntax);
-    
-        return true;
-    }
-    
-    private (bool success, VariableDeclarationSyntax? variableDeclarationSyntax) FindVariableInScopes(string typeName)
-    {
-        if (Variables.TryGetValue(typeName, out var variable))
-        {
-            return (true, variable);
-        }
-        
-        if (Parent is not null)
-        {
-            return Parent.FindVariableInScopes(typeName);
-        }
-    
-        return (false, null);
+        return null;
     }
 }

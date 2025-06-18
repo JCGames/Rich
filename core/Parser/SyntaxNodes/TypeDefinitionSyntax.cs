@@ -5,7 +5,7 @@ public class TypeDefinitionSyntax(IdentifierSyntax identifierSyntax) : Syntax
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public List<VariableDeclarationSyntax> Variables { get; } = [];
     public List<FunctionSyntax> Functions { get; } = [];
-    public GenericsListDefinitionSyntax? GenericsListDefinition { get; set; }
+    public TypeParameterListSyntax? GenericsListDefinition { get; set; }
     
     public override void Print()
     {

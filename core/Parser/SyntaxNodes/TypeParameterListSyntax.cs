@@ -1,6 +1,6 @@
 namespace Rich.Parser.SyntaxNodes;
 
-public class GenericsListDefinitionSyntax : Syntax
+public class TypeParameterListSyntax : Syntax
 {
     public List<IdentifierSyntax> Identifiers { get; } = [];
     

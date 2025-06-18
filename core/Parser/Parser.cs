@@ -255,7 +255,7 @@ public partial class Parser
         // if this function has generics
         if (Token.Type is TokenType.LessThan)
         {
-            function.GenericsListDefinition = ParseGenericsListDefinition();
+            function.TypeParameterList = ParseGenericsListDefinition();
             MoveNext();
         }
         
@@ -549,7 +549,7 @@ public partial class Parser
 
         MoveNext();
 
-        GenericsListDefinitionSyntax? genericsListDefinitionSyntax = null;
+        TypeParameterListSyntax? genericsListDefinitionSyntax = null;
 
         if (Token.Type is TokenType.LessThan)
         {
@@ -687,9 +687,9 @@ public partial class Parser
         return accessor;
     }
 
-    private GenericsListDefinitionSyntax ParseGenericsListDefinition()
+    private TypeParameterListSyntax ParseGenericsListDefinition()
     {
-        var genericsListDefinitionSyntax = new GenericsListDefinitionSyntax();
+        var genericsListDefinitionSyntax = new TypeParameterListSyntax();
             
         MoveNext();
 
@@ -712,9 +712,9 @@ public partial class Parser
         return genericsListDefinitionSyntax;
     }
     
-    private GenericsListSyntax ParseGenericsList()
+    private TypeListSyntax ParseGenericsList()
     {
-        var genericsListSyntax = new GenericsListSyntax();
+        var genericsListSyntax = new TypeListSyntax();
             
         MoveNext();
 
@@ -740,7 +740,7 @@ public partial class Parser
     private TypeSyntax ParseType(bool allowArrayType = true)
     {
         TypeSyntax? typeSyntax;
-        GenericsListSyntax? genericsListSyntax = null;
+        TypeListSyntax? genericsListSyntax = null;
         
         if (Token.Type is not TokenType.Identifier and not TokenType.BuiltInType) Report.Error("Type should have a valid name.", Token.Span);
 

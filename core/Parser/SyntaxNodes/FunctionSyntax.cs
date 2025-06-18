@@ -5,7 +5,7 @@ namespace Rich.Parser.SyntaxNodes;
 public class FunctionSyntax(IdentifierSyntax identifierSyntax) : Syntax
 {
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
-    public GenericsListDefinitionSyntax? GenericsListDefinition { get; set; }
+    public TypeParameterListSyntax? TypeParameterList { get; set; }
     public List<ParameterSyntax> Parameters { get; } = [];
     public TypeSyntax? ReturnType { get; set; }
     public BlockSyntax Body { get; set; } = null!;
@@ -23,7 +23,7 @@ public class FunctionSyntax(IdentifierSyntax identifierSyntax) : Syntax
         
         Printer.PrintLine("Generics:");
         Printer.IncreasePadding();
-        GenericsListDefinition?.Print();
+        TypeParameterList?.Print();
         Printer.DecreasePadding();
         
         Printer.PrintLine("Parameters:");

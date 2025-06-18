@@ -6,7 +6,7 @@ namespace Rich.Parser.SyntaxNodes;
 public class FunctionCallSyntax(IdentifierSyntax identifierSyntax) : Syntax
 {
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
-    public GenericsListSyntax? Generics { get; set; }
+    public TypeListSyntax? Generics { get; set; }
     public List<ExpressionSyntax> Arguments { get; } = [];
     
     public override void Print()

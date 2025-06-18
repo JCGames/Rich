@@ -1,6 +1,6 @@
 namespace Rich.Parser.SyntaxNodes;
 
-public class GenericsListSyntax : Syntax
+public class TypeListSyntax : Syntax
 {
     public List<TypeSyntax> Types { get; } = [];
     

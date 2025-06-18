@@ -1,22 +1,11 @@
-type List<T> 
+type Value 
 {
 
 }
 
-type List2<T>
+function myFunc()
 {
-
+    myVar: str -> "Hello, world!"
 }
 
-_a: int
-a: decimal
-
-function doWhile()
-{
-
-}
-
-function do()
-{
-
-}
+myVar: str -> "Another one."
