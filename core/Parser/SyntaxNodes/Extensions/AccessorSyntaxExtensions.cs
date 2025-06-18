@@ -1,5 +1,3 @@
-using Rich.Parser.SyntaxNodes.Expressions;
-
 namespace Rich.Parser.SyntaxNodes.Extensions;
 
 public static class AccessorSyntaxExtensions

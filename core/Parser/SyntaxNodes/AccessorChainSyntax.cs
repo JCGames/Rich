@@ -1,4 +1,4 @@
-namespace Rich.Parser.SyntaxNodes.Expressions;
+namespace Rich.Parser.SyntaxNodes;
 
 public class AccessorChainSyntax : Syntax
 {
