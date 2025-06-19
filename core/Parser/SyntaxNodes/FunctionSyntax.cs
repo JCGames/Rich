@@ -8,7 +8,7 @@ public class FunctionSyntax(IdentifierSyntax identifierSyntax) : Syntax
     public TypeParameterListSyntax? TypeParameterList { get; set; }
     public List<ParameterSyntax> Parameters { get; } = [];
     public TypeSyntax? ReturnType { get; set; }
-    public BlockSyntax Body { get; set; } = null!;
+    public BlockSyntax Block { get; set; } = null!;
 
     public override void Print()
     {
@@ -34,6 +34,6 @@ public class FunctionSyntax(IdentifierSyntax identifierSyntax) : Syntax
         }
         Printer.DecreasePadding();
         
-        Body.Print();
+        Block.Print();
     }
 }

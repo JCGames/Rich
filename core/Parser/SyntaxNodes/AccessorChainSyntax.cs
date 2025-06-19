@@ -4,6 +4,11 @@ public class AccessorChainSyntax : Syntax
 {
     public List<Syntax> Chain { get; } = [];
     
+    /// <summary>
+    /// The type returned from the chain.
+    /// </summary>
+    public TypeDefinitionSyntax? Binding { get; set; }
+    
     public override void Print()
     {
         PrintName();

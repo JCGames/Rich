@@ -1,3 +1,5 @@
+using Rich.Lexer;
+
 namespace Rich.Parser.SyntaxNodes.Expressions;
 
 public enum UnaryOperatorKind
@@ -6,9 +8,10 @@ public enum UnaryOperatorKind
     Not
 }
 
-public class UnaryOperatorSyntax(UnaryOperatorKind kind) : Syntax
+public class UnaryOperatorSyntax(SpanMeta operatorSpan, UnaryOperatorKind kind) : Syntax
 {
-    public UnaryOperatorKind Kind { get; init; } = kind;
+    public SpanMeta OperatorSpan { get; init; } = operatorSpan;
+    public UnaryOperatorKind Kind { get; } = kind;
     public Syntax? Operand { get; init; }
     
     public override void Print()

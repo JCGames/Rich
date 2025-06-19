@@ -5,7 +5,7 @@ public class TypeDefinitionSyntax(IdentifierSyntax identifierSyntax) : Syntax
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public List<VariableDeclarationSyntax> Variables { get; } = [];
     public List<FunctionSyntax> Functions { get; } = [];
-    public TypeParameterListSyntax? GenericsListDefinition { get; set; }
+    public TypeParameterListSyntax? TypeParameterList { get; set; }
     
     public override void Print()
     {
@@ -15,7 +15,7 @@ public class TypeDefinitionSyntax(IdentifierSyntax identifierSyntax) : Syntax
         
         Printer.PrintLine("Generics:");
         Printer.IncreasePadding();
-        GenericsListDefinition?.Print();
+        TypeParameterList?.Print();
         Printer.DecreasePadding();
         
         Printer.PrintLine("Fields:");

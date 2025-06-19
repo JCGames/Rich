@@ -1,8 +1,8 @@
 namespace Rich.Parser.SyntaxNodes;
 
-public class NewSyntax(Syntax accessorChain) : Syntax
+public class NewSyntax(AccessorChainSyntax accessorChain) : Syntax
 {
-    public Syntax AccessorChain { get; } = accessorChain;
+    public AccessorChainSyntax AccessorChain { get; } = accessorChain;
     
     public override void Print()
     {

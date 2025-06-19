@@ -39,8 +39,9 @@ public partial class Parser
         {
             if (Token.Type is TokenType.LogicalAnd)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.LogicalAnd)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.LogicalAnd)
                 {
                     Left = left,
                     Right = ParseEquality()
@@ -48,8 +49,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.LogicalOr)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.LogicalOr)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.LogicalOr)
                 {
                     Left = left,
                     Right = ParseEquality()
@@ -68,8 +70,9 @@ public partial class Parser
         {
             if (Token.Type is TokenType.Equals)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.Equals)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.Equals)
                 {
                     Left = left,
                     Right = ParseRelational()
@@ -77,8 +80,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.NotEquals)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.NotEquals)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.NotEquals)
                 {
                     Left = left,
                     Right = ParseRelational()
@@ -100,8 +104,9 @@ public partial class Parser
         {
             if (Token.Type is TokenType.GreaterThan)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.GreaterThan)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.GreaterThan)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -109,8 +114,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.LessThan)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.LessThan)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.LessThan)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -118,8 +124,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.GreaterThanOrEqual)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.GreaterThanOrEqualTo)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.GreaterThanOrEqualTo)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -127,8 +134,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.LessThanOrEqual)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.LessThanOrEqualTo)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.LessThanOrEqualTo)
                 {
                     Left = left,
                     Right = ParseAdditive()
@@ -147,8 +155,9 @@ public partial class Parser
         {
             if (Token.Type is TokenType.Addition)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.Addition)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.Addition)
                 {
                     Left = left,
                     Right = ParseMultiplicative()
@@ -156,8 +165,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.Subtraction)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.Subtraction)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.Subtraction)
                 {
                     Left = left,
                     Right = ParseMultiplicative()
@@ -176,8 +186,9 @@ public partial class Parser
         {
             if (Token.Type is TokenType.Multiplication)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.Multiplication)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.Multiplication)
                 {
                     Left = left,
                     Right = ParsePrimary()
@@ -185,8 +196,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.Division)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.Division)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.Division)
                 {
                     Left = left,
                     Right = ParsePrimary()
@@ -194,8 +206,9 @@ public partial class Parser
             }
             else if (Token.Type is TokenType.Modulus)
             {
+                var tokenSpan = Token.Span;
                 MoveNext();
-                left = new BinaryOperatorSyntax(BinaryOperatorKind.Modulus)
+                left = new BinaryOperatorSyntax(tokenSpan, BinaryOperatorKind.Modulus)
                 {
                     Left = left,
                     Right = ParsePrimary()
@@ -256,10 +269,10 @@ public partial class Parser
                 break;
             case TokenType.Subtraction:
                 MoveNext();
-                return new UnaryOperatorSyntax(UnaryOperatorKind.Negation) { Operand = ParsePrimary() };
+                return new UnaryOperatorSyntax(Token.Span, UnaryOperatorKind.Negation) { Operand = ParsePrimary() };
             case TokenType.Not:
                 MoveNext();
-                return new UnaryOperatorSyntax(UnaryOperatorKind.Not) { Operand = ParsePrimary() };
+                return new UnaryOperatorSyntax(Token.Span, UnaryOperatorKind.Not) { Operand = ParsePrimary() };
             case TokenType.OpenParenthesis:
             {
                 MoveNext();

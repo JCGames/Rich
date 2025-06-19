@@ -15,4 +15,9 @@ public class TypeListSyntax : Syntax
         }
         Printer.DecreasePadding();
     }
+    
+    public string ToNumberOfGenericsString()
+    {
+        return Types.Count > 0 ? $"'{Types.Count}" : string.Empty;
+    }
 }

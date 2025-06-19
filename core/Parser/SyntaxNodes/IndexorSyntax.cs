@@ -6,6 +6,7 @@ public class IndexorSyntax(IdentifierSyntax identifierSyntax, ExpressionSyntax e
 {
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
     public ExpressionSyntax IndexExpression { get; } = expressionSyntax;
+    public VariableDeclarationSyntax? Binding { get; set; }
     
     public override void Print()
     {

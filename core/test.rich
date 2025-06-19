@@ -1,11 +1,12 @@
-type Value 
+function calculateVector2(): Vector2
 {
-
+    
 }
 
-function myFunc()
+type Vector2
 {
-    myVar: str -> "Hello, world!"
+    x: -> 0
+    y: -> 0
 }
 
-myVar: str -> "Another one."
+myVar: Vector2 -> calculateVector2() + 

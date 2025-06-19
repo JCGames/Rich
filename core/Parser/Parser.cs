@@ -297,7 +297,7 @@ public partial class Parser
         }
         
         AssertToken(TokenType.OpenBracket, "Function should have a body but is missing {.");
-        function.Body = ParseBlock(BlockType.Block);
+        function.Block = ParseBlock(BlockType.Block);
         return function;
     }
     
@@ -367,10 +367,11 @@ public partial class Parser
         else if (Peek()?.Type is TokenType.Assignment)
         {
             MoveNext();
+            var operatorSpan = Token.Span;
             MoveNext();
             var expression = ParseExpression();
             MoveNext(MoveInclude.NewLines);
-            return new BinaryOperatorSyntax(BinaryOperatorKind.Assignment)
+            return new BinaryOperatorSyntax(operatorSpan, BinaryOperatorKind.Assignment)
             {
                 Left = accessorChain,
                 Right = expression
@@ -590,7 +591,7 @@ public partial class Parser
         if (Token.Type is not TokenType.CloseBracket) Report.Error($"The body for the type definition {identifierSpan.Text} should end with }}.", Token.Span);
         MoveNext(MoveInclude.NewLines);
 
-        typeDefinition.GenericsListDefinition = genericsListDefinitionSyntax;
+        typeDefinition.TypeParameterList = genericsListDefinitionSyntax;
         return typeDefinition;
     }
     
@@ -604,7 +605,7 @@ public partial class Parser
         // if the function call has generics
         if (Token.Type is TokenType.LessThan)
         {
-            functionCall.Generics = ParseGenericsList();
+            functionCall.TypeList = ParseGenericsList();
             MoveNext();
         }
         
@@ -767,7 +768,7 @@ public partial class Parser
             typeSyntax = new TypeSyntax(identifierSpan);
         }
         
-        typeSyntax.GenericsList = genericsListSyntax;
+        typeSyntax.TypeList = genericsListSyntax;
         typeSyntax.IsBuiltIn = isBuiltIn;
 
         return typeSyntax;

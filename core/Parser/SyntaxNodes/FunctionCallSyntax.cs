@@ -6,8 +6,9 @@ namespace Rich.Parser.SyntaxNodes;
 public class FunctionCallSyntax(IdentifierSyntax identifierSyntax) : Syntax
 {
     public IdentifierSyntax Identifier { get; } = identifierSyntax;
-    public TypeListSyntax? Generics { get; set; }
+    public TypeListSyntax? TypeList { get; set; }
     public List<ExpressionSyntax> Arguments { get; } = [];
+    public FunctionSyntax? Binding { get; set; }
     
     public override void Print()
     {
@@ -15,7 +16,7 @@ public class FunctionCallSyntax(IdentifierSyntax identifierSyntax) : Syntax
         
         Printer.PrintLine($"Name: {identifierSyntax.Span.Text}");
         
-        Generics?.Print();
+        TypeList?.Print();
         
         Printer.PrintLine("Arguments: [");
         Printer.IncreasePadding();

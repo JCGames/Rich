@@ -1,3 +1,5 @@
+using Rich.Lexer;
+
 namespace Rich.Parser.SyntaxNodes.Expressions;
 
 public enum BinaryOperatorKind
@@ -18,9 +20,10 @@ public enum BinaryOperatorKind
     Assignment
 }
 
-public class BinaryOperatorSyntax(BinaryOperatorKind kind) : Syntax
+public class BinaryOperatorSyntax(SpanMeta operatorSpan, BinaryOperatorKind kind) : Syntax
 {
-    public BinaryOperatorKind Kind { get; init; } = kind;
+    public SpanMeta OperatorSpan { get; init; } = operatorSpan;
+    public BinaryOperatorKind Kind { get; } = kind;
     public Syntax? Left { get; init; }
     public Syntax? Right { get; init; }
 
