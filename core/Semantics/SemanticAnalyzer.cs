@@ -6,8 +6,6 @@ namespace Rich.Semantics;
 
 public static class SemanticAnalyzer
 {
-    public static Scope GlobalScope { get; } = new();
-
     public static void Run(List<SyntaxTree> syntaxTrees)
     {
         foreach (var syntaxTree in syntaxTrees)
