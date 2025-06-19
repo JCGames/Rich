@@ -590,7 +590,7 @@ public partial class Parser
         if (Token.Type is not TokenType.CloseBracket) Report.Error($"The body for the type definition {identifierSpan.Text} should end with }}.", Token.Span);
         MoveNext(MoveInclude.NewLines);
 
-        typeDefinition.GenericsListDefinition = genericsListDefinitionSyntax;
+        typeDefinition.TypeParameterList = genericsListDefinitionSyntax;
         return typeDefinition;
     }
     
@@ -604,7 +604,7 @@ public partial class Parser
         // if the function call has generics
         if (Token.Type is TokenType.LessThan)
         {
-            functionCall.Generics = ParseGenericsList();
+            functionCall.TypeList = ParseGenericsList();
             MoveNext();
         }
         
@@ -767,7 +767,7 @@ public partial class Parser
             typeSyntax = new TypeSyntax(identifierSpan);
         }
         
-        typeSyntax.GenericsList = genericsListSyntax;
+        typeSyntax.TypeList = genericsListSyntax;
         typeSyntax.IsBuiltIn = isBuiltIn;
 
         return typeSyntax;

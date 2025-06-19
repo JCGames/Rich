@@ -18,9 +18,4 @@ public class TypeParameterListSyntax : Syntax
     {
         return $"<{string.Join(',', Identifiers)}>";
     }
-
-    public string ToNumberOfGenericsString()
-    {
-        return Identifiers.Count > 0 ? $"'{Identifiers.Count}" : string.Empty;
-    }
 }
